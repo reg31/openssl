@@ -1,0 +1,69 @@
+name: Build OpenSSL for ARM
+
+on:
+  workflow_dispatch:  # Manual trigger
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build-openssl:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        arch: [armv7, armv8]
+        asm: [no-asm]
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+      
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential git perl make
+          
+          # Install cross-compilation tools
+          if [ "${{ matrix.arch }}" = "armv7" ]; then
+            sudo apt-get install -y gcc-arm-linux-gnueabihf libc6-dev-armhf-cross
+          elif [ "${{ matrix.arch }}" = "armv8" ]; then
+            sudo apt-get install -y gcc-aarch64-linux-gnu libc6-dev-arm64-cross
+          fi
+      
+      - name: Clone OpenSSL
+        run: |
+          git clone https://github.com/openssl/openssl.git
+          cd openssl
+          git checkout master
+      
+      - name: Configure OpenSSL for ${{ matrix.arch }} with ${{ matrix.asm }}
+        working-directory: openssl
+        run: |
+          if [ "${{ matrix.arch }}" = "armv7" ]; then
+            export CROSS_COMPILE="arm-linux-gnueabihf-"
+            ./Configure linux-armv4 ${{ matrix.asm }} --prefix=/usr/local --openssldir=/etc/ssl
+          elif [ "${{ matrix.arch }}" = "armv8" ]; then
+            export CROSS_COMPILE="aarch64-linux-gnu-"
+            ./Configure linux-aarch64 ${{ matrix.asm }} --prefix=/usr/local --openssldir=/etc/ssl
+          fi
+      
+      - name: Build OpenSSL
+        working-directory: openssl
+        run: |
+          make -j$(nproc)
+      
+      - name: Create artifact directory
+        run: mkdir -p artifacts
+      
+      - name: Package OpenSSL binaries
+        working-directory: openssl
+        run: |
+          tar -czvf ../artifacts/openssl-${{ matrix.arch }}-${{ matrix.asm }}.tar.gz apps/openssl libssl.so* libcrypto.so* include/openssl/*.h
+      
+      - name: Upload OpenSSL artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: openssl-${{ matrix.arch }}-${{ matrix.asm }}
+          path: artifacts/openssl-${{ matrix.arch }}-${{ matrix.asm }}.tar.gz
+          retention-days: 7
