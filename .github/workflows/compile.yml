@@ -1,4 +1,4 @@
-name: Build OpenSSL for ARM
+name: Build OpenSSL for Android
 
 on:
   workflow_dispatch:  # Manual trigger
@@ -8,28 +8,44 @@ on:
     branches: [ main ]
 
 jobs:
-  build-openssl:
+  build-openssl-android:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        arch: [armv7, armv8]
-        asm: [no-asm]
+        arch: [arm, arm64]
+        include:
+          - arch: arm
+            android_abi: armeabi-v7a
+            openssl_target: android-arm
+          - arch: arm64
+            android_abi: arm64-v8a
+            openssl_target: android-arm64
     
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
+      
+      - name: Set up JDK
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '23'
+      
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
       
       - name: Install dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y build-essential git perl make
-          
-          # Install cross-compilation tools
-          if [ "${{ matrix.arch }}" = "armv7" ]; then
-            sudo apt-get install -y gcc-arm-linux-gnueabihf libc6-dev-armhf-cross
-          elif [ "${{ matrix.arch }}" = "armv8" ]; then
-            sudo apt-get install -y gcc-aarch64-linux-gnu libc6-dev-arm64-cross
-          fi
+          sudo apt-get install -y build-essential git perl make curl
+      
+      - name: Download NDK
+        run: |
+          mkdir -p ${ANDROID_HOME}/ndk
+          cd ${ANDROID_HOME}/ndk
+          curl -O https://dl.google.com/android/repository/android-ndk-r28-linux.zip
+          unzip -q android-ndk-r28-linux.zip
+          echo "ANDROID_NDK_HOME=${ANDROID_HOME}/ndk/android-ndk-r28" >> $GITHUB_ENV
       
       - name: Clone OpenSSL
         run: |
@@ -37,33 +53,46 @@ jobs:
           cd openssl
           git checkout master
       
-      - name: Configure OpenSSL for ${{ matrix.arch }} with ${{ matrix.asm }}
+      - name: Set up environment variables
+        run: |
+          echo "ANDROID_API=35" >> $GITHUB_ENV
+          echo "OUTPUT_DIR=$(pwd)/output/${{ matrix.android_abi }}" >> $GITHUB_ENV
+      
+      - name: Configure OpenSSL for Android ${{ matrix.android_abi }} with no-asm
         working-directory: openssl
         run: |
-          if [ "${{ matrix.arch }}" = "armv7" ]; then
-            export CROSS_COMPILE="arm-linux-gnueabihf-"
-            ./Configure linux-armv4 ${{ matrix.asm }} --prefix=/usr/local --openssldir=/etc/ssl
-          elif [ "${{ matrix.arch }}" = "armv8" ]; then
-            export CROSS_COMPILE="aarch64-linux-gnu-"
-            ./Configure linux-aarch64 ${{ matrix.asm }} --prefix=/usr/local --openssldir=/etc/ssl
+          mkdir -p ${{ env.OUTPUT_DIR }}
+          
+          # Add Android NDK to PATH
+          export PATH=$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin:$PATH
+          
+          if [ "${{ matrix.arch }}" = "arm" ]; then
+            export CC=armv7a-linux-androideabi${{ env.ANDROID_API }}-clang
+            export CXX=armv7a-linux-androideabi${{ env.ANDROID_API }}-clang++
+          else
+            export CC=aarch64-linux-android${{ env.ANDROID_API }}-clang
+            export CXX=aarch64-linux-android${{ env.ANDROID_API }}-clang++
           fi
+          
+          ./Configure ${{ matrix.openssl_target }} no-asm \
+            -D__ANDROID_API__=${{ env.ANDROID_API }} \
+            --prefix=${{ env.OUTPUT_DIR }} \
+            --openssldir=${{ env.OUTPUT_DIR }}
       
       - name: Build OpenSSL
         working-directory: openssl
         run: |
           make -j$(nproc)
-      
-      - name: Create artifact directory
-        run: mkdir -p artifacts
+          make install_sw
       
       - name: Package OpenSSL binaries
-        working-directory: openssl
         run: |
-          tar -czvf ../artifacts/openssl-${{ matrix.arch }}-${{ matrix.asm }}.tar.gz apps/openssl libssl.so* libcrypto.so* include/openssl/*.h
+          mkdir -p artifacts
+          tar -czvf artifacts/openssl-android-${{ matrix.android_abi }}-no-asm.tar.gz -C output ${{ matrix.android_abi }}
       
       - name: Upload OpenSSL artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: openssl-${{ matrix.arch }}-${{ matrix.asm }}
-          path: artifacts/openssl-${{ matrix.arch }}-${{ matrix.asm }}.tar.gz
+          name: openssl-android-${{ matrix.android_abi }}-no-asm
+          path: artifacts/openssl-android-${{ matrix.android_abi }}-no-asm.tar.gz
           retention-days: 7
