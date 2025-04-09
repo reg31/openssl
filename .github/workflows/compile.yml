@@ -62,7 +62,7 @@ jobs:
           tar -czvf ../artifacts/openssl-${{ matrix.arch }}-${{ matrix.asm }}.tar.gz apps/openssl libssl.so* libcrypto.so* include/openssl/*.h
       
       - name: Upload OpenSSL artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: openssl-${{ matrix.arch }}-${{ matrix.asm }}
           path: artifacts/openssl-${{ matrix.arch }}-${{ matrix.asm }}.tar.gz
