@@ -7,7 +7,7 @@ on:
       openssl_branch:
         description: 'OpenSSL branch/tag to build'
         required: true
-        default: "master"
+        default: "openssl-3.5"
         type: string
   schedule:
     - cron: '0 0 * * *'  # Run daily at midnight UTC
@@ -90,14 +90,20 @@ jobs:
           
           # Use a single, correct Configure command
           ./Configure no-asm no-apps no-tests no-docs no-legacy \
-          no-dtls no-afalgeng no-async no-capieng no-cmp no-cms no-comp no-ct \
-          no-docs no-dgram no-dso no-dynamic-engine no-engine no-filenames no-gost \
-          no-http no-module no-nextprotoneg no-ocsp no-padlockeng no-quic no-sock \
+          no-dtls no-afalgeng no-capieng no-cmp no-cms no-comp no-ct \
+          no-dgram no-dso no-engine no-filenames no-gost \
+          no-http no-module no-nextprotoneg no-padlockeng no-sock \
           no-srp no-srtp no-ssl-trace no-static-engine no-ts \
           no-ui-console no-uplink no-ssl3-method no-tls1-method no-tls1_1-method \
           no-dtls1-method no-dtls1_2-method no-argon2 no-bf no-blake2 no-cast no-cmac \
           no-dsa no-idea no-md4 no-mdc2 no-ocb no-rc2 no-rc4 no-rmd160 no-scrypt \
           no-siphash no-siv no-sm2 no-sm3 no-sm4 no-whirlpool \
+          no-afalgeng no-acvp-tests no-asam no-brotli no-brotli-dynamic no-buildtest-c++ \
+          no-crypto-mdebug no-demos no-devcryptoeng no-egd no-ec-nistp-64-gcc-128 \
+          no-external-tests n-fips no-fips-securitychecks no-fuzz-afl no-fuzz-libfuzzer \
+          no-h3demo no-jitter no-ktls no-md2 no-msan no-nasm no-pie no-rc5 no-sctp \
+          no-ssl no-static-engine no-tfo no-trace no-ubsan no-unit-test no-weak-ssl-cyphers \
+          no-winstore no-zlib no-zlib-dynamic no-zstd no-zstd-dynamic \
             --prefix=${{ env.OUTPUT_DIR }} \
             --openssldir=${{ env.OUTPUT_DIR }}
       
