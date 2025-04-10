@@ -73,11 +73,15 @@ jobs:
           export PATH=$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin:$PATH
           
           if [ "${{ matrix.arch }}" = "arm" ]; then
-            export CC=armv7a-linux-androideabi-clang
-            export CXX=armv7a-linux-androideabi-clang++
+          ./Configure android-arm -D__ANDROID_API__=${{ env.ANDROID_API }} \
+          no-asm \
+          --prefix=${{ env.OUTPUT_DIR }} \
+          --openssldir=${{ env.OUTPUT_DIR }}
           else
-            export CC=aarch64-linux-android-clang
-            export CXX=aarch64-linux-android-clang++
+          ./Configure android-arm64 -D__ANDROID_API__=${{ env.ANDROID_API }} \
+          no-asm \
+          --prefix=${{ env.OUTPUT_DIR }} \
+          --openssldir=${{ env.OUTPUT_DIR }}
           fi
           
           ./Configure ${{ matrix.openssl_target }} no-asm no-apps no-tests no-docs \
