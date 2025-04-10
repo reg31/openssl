@@ -1,11 +1,13 @@
 name: Build OpenSSL for Android
+env:
+  DEFAULT_OPENSSL_BRANCH: 'openssl-3.4'
 on:
   workflow_dispatch:  # Manual trigger
     inputs:
       openssl_branch:
         description: 'OpenSSL branch/tag to build'
         required: true
-        default: 'openssl-3.4'
+        default: ${{ env.DEFAULT_OPENSSL_BRANCH }}
         type: string
   schedule:
     - cron: '0 0 * * *'  # Run daily at midnight UTC
@@ -63,7 +65,7 @@ jobs:
           git clone https://github.com/openssl/openssl.git
           cd openssl
           # Use the branch specified in workflow_dispatch input or default to master
-          BRANCH_TO_USE="${{ github.event.inputs.openssl_branch || 'master' }}"
+          BRANCH_TO_USE="${{ github.event.inputs.openssl_branch || env.DEFAULT_OPENSSL_BRANCH }}"
           echo "Checking out OpenSSL branch/tag: $BRANCH_TO_USE"
           git checkout $BRANCH_TO_USE
           
