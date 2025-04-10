@@ -161,7 +161,6 @@ jobs:
           name: "OpenSSL for Android - Daily Build"
           body: |
             Automated daily build of OpenSSL ${{ env.OPENSSL_BRANCH }} for Android
-            Built on: ${{ github.event.repository.updated_at || github.run_id }}
             
             **Note:** This snapshot may be overwritten by newer daily builds.
           files: |
