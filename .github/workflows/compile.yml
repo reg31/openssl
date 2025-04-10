@@ -90,7 +90,7 @@ jobs:
           
           # Use a single, correct Configure command
           ./Configure ${{ matrix.openssl_target }} no-asm no-apps no-tests no-docs no-legacy \
-          no-dtls no-afalgeng no-capieng no-cmp no-cms no-comp no-ct \
+          no-dtls no-capieng no-cmp no-cms no-comp no-ct \
           no-dgram no-dso no-engine no-filenames no-gost \
           no-http no-module no-nextprotoneg no-padlockeng no-sock \
           no-srp no-srtp no-ssl-trace no-ts \
@@ -103,7 +103,8 @@ jobs:
           no-external-tests no-fips no-fips-securitychecks no-fuzz-afl no-fuzz-libfuzzer \
           no-h3demo no-jitter no-ktls no-md2 no-msan no-pie no-rc5 no-sctp \
           no-ssl no-static-engine no-tfo no-trace no-ubsan no-unit-test \
-          no-winstore no-zlib no-zlib-dynamic no-zstd no-zstd-dynamic no-deprecated \
+          no-winstore no-zlib no-zlib-dynamic no-zstd no-zstd-dynamic \
+          no-krb5 no-weak-ssl-ciphers \
             --prefix=${{ env.OUTPUT_DIR }} \
             --openssldir=${{ env.OUTPUT_DIR }}
       
