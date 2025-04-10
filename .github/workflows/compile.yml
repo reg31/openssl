@@ -66,7 +66,7 @@ jobs:
           git checkout $BRANCH_TO_USE
           
           # Get OpenSSL version and save it
-          OPENSSL_VERSION=$(./config --version)
+          OPENSSL_VERSION="$(./config --version)"
           echo "OPENSSL_VERSION=$OPENSSL_VERSION" >> $GITHUB_ENV
       
       - name: Set up environment variables
