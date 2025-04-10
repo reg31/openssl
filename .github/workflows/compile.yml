@@ -1,6 +1,12 @@
 name: Build OpenSSL for Android
 on:
   workflow_dispatch:  # Manual trigger
+    inputs:
+      openssl_branch:
+        description: 'OpenSSL branch/tag to build'
+        required: true
+        default: '3.5'
+        type: string
   push:
     branches: [ main ]
   pull_request:
@@ -57,7 +63,10 @@ jobs:
         run: |
           git clone https://github.com/openssl/openssl.git
           cd openssl
-          git checkout master
+          # Use the branch specified in workflow_dispatch input or default to master
+          BRANCH_TO_USE="${{ github.event.inputs.openssl_branch || 'master' }}"
+          echo "Checking out OpenSSL branch/tag: $BRANCH_TO_USE"
+          git checkout $BRANCH_TO_USE
       
       - name: Set up environment variables
         run: |
@@ -116,7 +125,7 @@ jobs:
           cpack -C ${{ matrix.build_type }}
       
       - name: Publish Snapshot Release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         if: ${{ (github.ref == 'refs/heads/main') && matrix.package_generator != '' }}
         with:
           tag_name: "snapshot-${{ github.sha }}"
@@ -124,7 +133,7 @@ jobs:
             build/openssl-android-${{ matrix.android_abi }}-*.*
       
       - name: Publish Tagged Release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         if: ${{ startsWith(github.ref, 'refs/tags/') && matrix.package_generator != '' }}
         with:
           files: |
