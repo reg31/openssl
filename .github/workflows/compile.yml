@@ -89,7 +89,7 @@ jobs:
           export PATH=$ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/linux-x86_64/bin:$PATH
           
           # Use a single, correct Configure command
-          ./Configure no-asm no-apps no-tests no-docs no-legacy \
+          ./Configure ${{ matrix.openssl_target }} no-asm no-apps no-tests no-docs no-legacy \
           no-dtls no-afalgeng no-capieng no-cmp no-cms no-comp no-ct \
           no-dgram no-dso no-engine no-filenames no-gost \
           no-http no-module no-nextprotoneg no-padlockeng no-sock \
