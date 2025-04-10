@@ -73,11 +73,11 @@ jobs:
           export PATH=$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin:$PATH
           
           if [ "${{ matrix.arch }}" = "arm" ]; then
-            export CC=armv7a-linux-androideabi${{ env.ANDROID_API }}-clang
-            export CXX=armv7a-linux-androideabi${{ env.ANDROID_API }}-clang++
+            export CC=armv7a-linux-androideabi-clang
+            export CXX=armv7a-linux-androideabi-clang++
           else
-            export CC=aarch64-linux-android${{ env.ANDROID_API }}-clang
-            export CXX=aarch64-linux-android${{ env.ANDROID_API }}-clang++
+            export CC=aarch64-linux-android-clang
+            export CXX=aarch64-linux-android-clang++
           fi
           
           ./Configure ${{ matrix.openssl_target }} no-asm no-apps no-tests no-docs \
@@ -89,12 +89,7 @@ jobs:
         working-directory: openssl
         run: |
           make -j$(nproc)
-          make install_sw 
-
-      - name: Package OpenSSL binaries
-        run: |
-          mkdir -p artifacts
-          tar -czvf artifacts/openssl-android-${{ matrix.android_abi }}-no-asm.tar.gz -C output ${{ matrix.android_abi }}     
+          make install 
 
       - name: CPack
         if: matrix.package_generator != ''
