@@ -26,6 +26,8 @@ jobs:
           - arch: arm64
             android_abi: arm64-v8a
             openssl_target: android-arm64
+        build_type:
+          - Release
     
     steps:
       - name: Checkout repository
