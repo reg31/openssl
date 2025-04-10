@@ -163,7 +163,7 @@ jobs:
             Automated daily build of OpenSSL ${{ env.OPENSSL_BRANCH }} for Android
             Built on: ${{ github.event.repository.updated_at || github.run_id }}
             
-            **Note:** This snapshot will be automatically deleted after 3 days.
+            **Note:** This snapshot may be overwritten by newer daily builds.
           files: |
             ${{ env.PACKAGE_DIR }}/openssl-android-${{ matrix.android_abi }}-*.zip
           prerelease: true
