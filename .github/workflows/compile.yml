@@ -20,7 +20,7 @@ jobs:
           - arch: arm64
             android_abi: arm64-v8a
             openssl_target: android-arm64
-			        build_type:
+        build_type:
           - Release
         package_generator:
           - TBZ2
