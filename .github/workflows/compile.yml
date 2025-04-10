@@ -7,6 +7,8 @@ on:
         required: true
         default: 'openssl-3.5'
         type: string
+  schedule:
+    - cron: '0 0 * * *'  # Run daily at midnight UTC
   push:
     branches: [ main ]
   pull_request:
@@ -24,11 +26,6 @@ jobs:
           - arch: arm64
             android_abi: arm64-v8a
             openssl_target: android-arm64
-        build_type:
-          - Release
-        package_generator:
-          - TBZ2
-          - ZIP
     
     steps:
       - name: Checkout repository
@@ -38,7 +35,7 @@ jobs:
         uses: actions/setup-java@v3
         with:
           distribution: 'temurin'
-          java-version: '17'  # Using a more established Java version
+          java-version: '17'
       
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
@@ -46,7 +43,7 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y build-essential git perl make curl cmake
+          sudo apt-get install -y build-essential git perl make curl
       
       - name: Download NDK
         run: |
@@ -67,12 +64,17 @@ jobs:
           BRANCH_TO_USE="${{ github.event.inputs.openssl_branch || 'master' }}"
           echo "Checking out OpenSSL branch/tag: $BRANCH_TO_USE"
           git checkout $BRANCH_TO_USE
+          
+          # Get OpenSSL version and save it
+          OPENSSL_VERSION=$(./config --version)
+          echo "OPENSSL_VERSION=$OPENSSL_VERSION" >> $GITHUB_ENV
       
       - name: Set up environment variables
         run: |
           echo "ANDROID_API=35" >> $GITHUB_ENV
           echo "OUTPUT_DIR=$(pwd)/output/${{ matrix.android_abi }}" >> $GITHUB_ENV
           echo "PACKAGE_DIR=$(pwd)/build" >> $GITHUB_ENV
+          echo "SNAPSHOT_TAG=daily-snapshot" >> $GITHUB_ENV
       
       - name: Configure OpenSSL for Android ${{ matrix.android_abi }}
         working-directory: openssl
@@ -82,10 +84,6 @@ jobs:
           # Set up NDK environment variables properly
           export ANDROID_NDK_ROOT=$ANDROID_NDK_HOME
           export PATH=$ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/linux-x86_64/bin:$PATH
-          
-          # Print debug info to verify paths
-          echo "PATH: $PATH"
-          ls -la $ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/linux-x86_64/bin/
           
           # Use a single, correct Configure command
           ./Configure ${{ matrix.openssl_target }} no-asm no-apps no-tests no-docs \
@@ -102,59 +100,91 @@ jobs:
           make -j$(nproc)
           make install
       
-      - name: Create CMake configuration for CPack
+      - name: Package .so files
         run: |
-          # Get OpenSSL version
-          OPENSSL_VERSION=$(cd openssl && ./config --version)
-          echo "Using OpenSSL version: $OPENSSL_VERSION"
-          
-          # Create a directory for packaging
           mkdir -p ${{ env.PACKAGE_DIR }}
           
-          # Create CMakeLists.txt for CPack
-          cat > ${{ env.OUTPUT_DIR }}/CMakeLists.txt << EOF
-          cmake_minimum_required(VERSION 3.10)
-          project(openssl-android-${{ matrix.android_abi }})
+          # Find all .so files in the output directory and create a zip file
+          find ${{ env.OUTPUT_DIR }} -name "*.so" -type f -exec ls -la {} \;
           
-          # Set CPack properties
-          set(CPACK_PACKAGE_NAME "openssl-android-${{ matrix.android_abi }}")
-          set(CPACK_PACKAGE_VERSION "${OPENSSL_VERSION}")
-          set(CPACK_PACKAGE_VENDOR "OpenSSL")
-          set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "OpenSSL for Android ${{ matrix.android_abi }}")
-          set(CPACK_PACKAGE_FILE_NAME "openssl-android-${{ matrix.android_abi }}-${OPENSSL_VERSION}")
-          set(CPACK_OUTPUT_FILE_PREFIX "${{ env.PACKAGE_DIR }}")
+          # Create a directory structure that matches what we want in the zip
+          TEMP_DIR=$(mktemp -d)
+          mkdir -p $TEMP_DIR/lib/${{ matrix.android_abi }}
           
-          # Include all files in the output directory
-          install(DIRECTORY ${{ env.OUTPUT_DIR }}/
-                  DESTINATION .
-                  PATTERN "CMakeFiles" EXCLUDE
-                  PATTERN "CMakeLists.txt" EXCLUDE
-                  PATTERN "cmake_install.cmake" EXCLUDE
-                  PATTERN "Makefile" EXCLUDE)
+          # Copy all .so files to the temp directory
+          cp $(find ${{ env.OUTPUT_DIR }} -name "*.so" -type f) $TEMP_DIR/lib/${{ matrix.android_abi }}/
           
-          include(CPack)
-          EOF
+          # Also copy includes for a complete package
+          mkdir -p $TEMP_DIR/include
+          cp -r ${{ env.OUTPUT_DIR }}/include/* $TEMP_DIR/include/
+          
+          # Create zip file
+          PACKAGE_NAME="openssl-android-${{ matrix.android_abi }}-${{ env.OPENSSL_VERSION }}"
+          cd $TEMP_DIR
+          zip -r ${{ env.PACKAGE_DIR }}/$PACKAGE_NAME.zip .
+          
+          # Also create a tar.gz file as an alternative
+          tar -czf ${{ env.PACKAGE_DIR }}/$PACKAGE_NAME.tar.gz .
+          
+          # List the created packages
+          ls -la ${{ env.PACKAGE_DIR }}/
       
-      - name: Run CMake and CPack
-        working-directory: ${{ env.OUTPUT_DIR }}
+      - name: Delete existing snapshot tag
+        if: ${{ (github.ref == 'refs/heads/main' || github.event_name == 'schedule') && matrix.arch == 'arm64' }}
         run: |
-          # Run CMake to generate the CPack configuration
-          cmake .
-          
-          # Run CPack with the specified generator
-          cpack -C ${{ matrix.build_type }} -G ${{ matrix.package_generator }}
+          # Delete the existing tag locally and remotely
+          git fetch --tags
+          if git rev-parse --verify ${{ env.SNAPSHOT_TAG }} &>/dev/null; then
+            git tag -d ${{ env.SNAPSHOT_TAG }}
+            git push origin :refs/tags/${{ env.SNAPSHOT_TAG }} || echo "Tag didn't exist remotely"
+          fi
       
-      - name: Publish Snapshot Release
+      - name: Delete existing snapshot release
+        if: ${{ (github.ref == 'refs/heads/main' || github.event_name == 'schedule') && matrix.arch == 'arm64' }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          # Delete existing release with this tag if it exists
+          release_id=$(gh release view ${{ env.SNAPSHOT_TAG }} --json id -q .id 2>/dev/null || echo "")
+          if [ ! -z "$release_id" ]; then
+            echo "Deleting existing release with ID: $release_id"
+            gh release delete ${{ env.SNAPSHOT_TAG }} --cleanup-tag --yes
+          else
+            echo "No existing release found to delete"
+          fi
+      
+      - name: Create new snapshot tag
+        if: ${{ (github.ref == 'refs/heads/main' || github.event_name == 'schedule') && matrix.arch == 'arm64' }}
+        run: |
+          # Create a new tag
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git tag -f ${{ env.SNAPSHOT_TAG }}
+          git push origin ${{ env.SNAPSHOT_TAG }} -f
+      
+      - name: Publish Daily Snapshot Release
         uses: softprops/action-gh-release@v2
-        if: ${{ (github.ref == 'refs/heads/main') && matrix.package_generator != '' }}
+        if: ${{ github.ref == 'refs/heads/main' || github.event_name == 'schedule' }}
         with:
-          tag_name: "snapshot-${{ github.sha }}"
+          tag_name: ${{ env.SNAPSHOT_TAG }}
+          name: "OpenSSL for Android - Daily Build"
+          body: |
+            Automated daily build of OpenSSL ${{ env.OPENSSL_VERSION }} for Android
+            Built on: ${{ github.event.repository.updated_at || github.run_id }}
+            Architecture: ${{ matrix.android_abi }}
           files: |
-            ${{ env.PACKAGE_DIR }}/openssl-android-${{ matrix.android_abi }}-*.*
+            ${{ env.PACKAGE_DIR }}/openssl-android-${{ matrix.android_abi }}-*.zip
+            ${{ env.PACKAGE_DIR }}/openssl-android-${{ matrix.android_abi }}-*.tar.gz
+          prerelease: true
       
       - name: Publish Tagged Release
         uses: softprops/action-gh-release@v2
-        if: ${{ startsWith(github.ref, 'refs/tags/') && matrix.package_generator != '' }}
+        if: ${{ startsWith(github.ref, 'refs/tags/') }}
         with:
+          name: "OpenSSL for Android ${{ env.OPENSSL_VERSION }}"
+          body: |
+            Release build of OpenSSL ${{ env.OPENSSL_VERSION }} for Android
+            Architecture: ${{ matrix.android_abi }}
           files: |
-            ${{ env.PACKAGE_DIR }}/openssl-android-${{ matrix.android_abi }}-*.*
+            ${{ env.PACKAGE_DIR }}/openssl-android-${{ matrix.android_abi }}-*.zip
+            ${{ env.PACKAGE_DIR }}/openssl-android-${{ matrix.android_abi }}-*.tar.gz
