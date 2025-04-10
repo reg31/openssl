@@ -104,7 +104,7 @@ jobs:
           no-h3demo no-jitter no-ktls no-md2 no-msan no-pie no-rc5 no-sctp \
           no-ssl no-static-engine no-tfo no-trace no-ubsan no-unit-test \
           no-winstore no-zlib no-zlib-dynamic no-zstd no-zstd-dynamic \
-          no-krb5 no-weak-ssl-ciphers no-psk no-err no-srp no-ec2m \
+          no-weak-ssl-ciphers no-psk no-err no-srp no-ec2m \
             --prefix=${{ env.OUTPUT_DIR }} \
             --openssldir=${{ env.OUTPUT_DIR }}
       
