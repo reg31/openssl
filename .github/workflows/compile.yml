@@ -148,7 +148,6 @@ jobs:
             **Note:** This snapshot will be automatically deleted after 3 days.
           files: |
             ${{ env.PACKAGE_DIR }}/openssl-android-${{ matrix.android_abi }}-*.zip
-            ${{ env.PACKAGE_DIR }}/openssl-android-${{ matrix.android_abi }}-*.tar.gz
           prerelease: true
           delete_after: "3d"
       
@@ -162,4 +161,3 @@ jobs:
             Architecture: ${{ matrix.android_abi }}
           files: |
             ${{ env.PACKAGE_DIR }}/openssl-android-${{ matrix.android_abi }}-*.zip
-            ${{ env.PACKAGE_DIR }}/openssl-android-${{ matrix.android_abi }}-*.tar.gz
