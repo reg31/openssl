@@ -5,7 +5,7 @@ on:
       openssl_branch:
         description: 'OpenSSL branch/tag to build'
         required: true
-        default: '3.5'
+        default: 'openssl-3.5'
         type: string
   push:
     branches: [ main ]
