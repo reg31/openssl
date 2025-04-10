@@ -37,7 +37,7 @@ jobs:
         uses: actions/setup-java@v3
         with:
           distribution: 'temurin'
-          java-version: '17'
+          java-version: '23'
       
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
@@ -99,8 +99,7 @@ jobs:
           export PATH=$ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/linux-x86_64/bin:$PATH
           
           make -j$(nproc)
-          make install
-      
+          
       - name: Package .so files
         run: |
           mkdir -p ${{ env.PACKAGE_DIR }}
@@ -112,7 +111,7 @@ jobs:
           # Find the libssl and libcrypto .so files
           LIBSSL=$(find ${{ env.OUTPUT_DIR }} -name "libssl*.so" -type f)
           LIBCRYPTO=$(find ${{ env.OUTPUT_DIR }} -name "libcrypto*.so" -type f)
-          
+
           # Strip the libraries
           llvm-strip --strip-all $LIBSSL
           llvm-strip --strip-all $LIBCRYPTO
@@ -145,7 +144,6 @@ jobs:
           body: |
             Automated daily build of OpenSSL ${{ env.OPENSSL_BRANCH }} for Android
             Built on: ${{ github.event.repository.updated_at || github.run_id }}
-            Architecture: ${{ matrix.android_abi }}
             
             **Note:** This snapshot will be automatically deleted after 3 days.
           files: |
