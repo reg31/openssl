@@ -103,7 +103,7 @@ jobs:
       
       - name: CPack
         if: matrix.package_generator != ''
-        working-directory: ./build
+        working-directory: $OUTPUT_DIR
         run: |
           cpack -C ${{matrix.build_type}} -G ${{matrix.package_generator}}
       
