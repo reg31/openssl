@@ -87,7 +87,7 @@ jobs:
           export PATH=$ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/linux-x86_64/bin:$PATH
           
           # Use a single, correct Configure command
-          ./Configure ${{ matrix.openssl_target }} no-asm no-apps no-tests no-docs no-legacy \
+          ./Configure ${{ matrix.openssl_target }} no-asm no-apps no-tests no-docs \
             --prefix=${{ env.OUTPUT_DIR }} \
             --openssldir=${{ env.OUTPUT_DIR }}
       
