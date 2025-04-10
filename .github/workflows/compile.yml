@@ -58,25 +58,22 @@ jobs:
           echo "ANDROID_API=35" >> $GITHUB_ENV
           echo "OUTPUT_DIR=$(pwd)/output/${{ matrix.android_abi }}" >> $GITHUB_ENV
       
-		- name: Configure OpenSSL for Android ${{ matrix.android_abi }} with no-asm
-		  working-directory: openssl
-		  run: |
-			# Make sure to use the full path to the Clang compiler
-			export ANDROID_NDK_ROOT=$ANDROID_NDK_HOME
-			export PATH=$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin:$PATH
-			
-			# Use the ANDROID_NDK_HOME directly in the Configure command
-			if [ "${{ matrix.arch }}" = "arm" ]; then
-			  ./Configure android-arm -D__ANDROID_API__=${{ env.ANDROID_API }} \
-				no-asm \
-				--prefix=${{ env.OUTPUT_DIR }} \
-				--openssldir=${{ env.OUTPUT_DIR }}
-			else
-			  ./Configure android-arm64 -D__ANDROID_API__=${{ env.ANDROID_API }} \
-				no-asm \
-				--prefix=${{ env.OUTPUT_DIR }} \
-				--openssldir=${{ env.OUTPUT_DIR }}
-			fi
+      - name: Configure OpenSSL for Android ${{ matrix.android_abi }} with no-asm
+        working-directory: openssl
+        run: |
+          mkdir -p ${{ env.OUTPUT_DIR }}
+          
+          # Add Android NDK to PATH
+		  export ANDROID_NDK_ROOT=$ANDROID_NDK_HOME
+          export PATH=$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin:$PATH
+          
+          if [ "${{ matrix.arch }}" = "arm" ]; then
+            export CC=armv7a-linux-androideabi${{ env.ANDROID_API }}-clang
+            export CXX=armv7a-linux-androideabi${{ env.ANDROID_API }}-clang++
+          else
+            export CC=aarch64-linux-android${{ env.ANDROID_API }}-clang
+            export CXX=aarch64-linux-android${{ env.ANDROID_API }}-clang++
+          fi
           
           ./Configure ${{ matrix.openssl_target }} no-asm \
             -D__ANDROID_API__=${{ env.ANDROID_API }} \
