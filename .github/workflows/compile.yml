@@ -1,12 +1,10 @@
 name: Build OpenSSL for Android
-
 on:
   workflow_dispatch:  # Manual trigger
   push:
     branches: [ main ]
   pull_request:
     branches: [ main ]
-
 jobs:
   build-openssl-android:
     runs-on: ubuntu-latest
@@ -34,7 +32,7 @@ jobs:
         uses: actions/setup-java@v3
         with:
           distribution: 'temurin'
-          java-version: '23'
+          java-version: '17'  # Using a more established Java version
       
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
@@ -42,7 +40,7 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y build-essential git perl make curl
+          sudo apt-get install -y build-essential git perl make curl cmake
       
       - name: Download NDK
         run: |
@@ -51,6 +49,9 @@ jobs:
           curl -O https://dl.google.com/android/repository/android-ndk-r28-linux.zip
           unzip -q android-ndk-r28-linux.zip
           echo "ANDROID_NDK_HOME=${ANDROID_HOME}/ndk/android-ndk-r28" >> $GITHUB_ENV
+          
+          # Verify NDK installation
+          ls -la ${ANDROID_HOME}/ndk/android-ndk-r28/toolchains/llvm/prebuilt/linux-x86_64/bin/
       
       - name: Clone OpenSSL
         run: |
@@ -63,50 +64,68 @@ jobs:
           echo "ANDROID_API=35" >> $GITHUB_ENV
           echo "OUTPUT_DIR=$(pwd)/output/${{ matrix.android_abi }}" >> $GITHUB_ENV
       
-      - name: Configure OpenSSL for Android ${{ matrix.android_abi }} with no-asm
+      - name: Configure OpenSSL for Android ${{ matrix.android_abi }}
         working-directory: openssl
         run: |
           mkdir -p ${{ env.OUTPUT_DIR }}
           
-          # Add Android NDK to PATH	  
+          # Set up NDK environment variables properly
           export ANDROID_NDK_ROOT=$ANDROID_NDK_HOME
-          export PATH=$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin:$PATH
+          export PATH=$ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/linux-x86_64/bin:$PATH
           
-          if [ "${{ matrix.arch }}" = "arm" ]; then
-          ./Configure android-arm -D__ANDROID_API__=${{ env.ANDROID_API }} \
-          no-asm \
-          --prefix=${{ env.OUTPUT_DIR }} \
-          --openssldir=${{ env.OUTPUT_DIR }}
-          else
-          ./Configure android-arm64 -D__ANDROID_API__=${{ env.ANDROID_API }} \
-          no-asm \
-          --prefix=${{ env.OUTPUT_DIR }} \
-          --openssldir=${{ env.OUTPUT_DIR }}
-          fi
+          # Print debug info to verify paths
+          echo "PATH: $PATH"
+          ls -la $ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/linux-x86_64/bin/
           
+          # Use a single, correct Configure command
+          ./Configure ${{ matrix.openssl_target }} no-asm no-apps no-tests no-docs \
+            -D__ANDROID_API__=${{ env.ANDROID_API }} \
+            --prefix=${{ env.OUTPUT_DIR }} \
+            --openssldir=${{ env.OUTPUT_DIR }}
+      
       - name: Build OpenSSL
         working-directory: openssl
         run: |
+          # Set up NDK environment variables properly
+          export ANDROID_NDK_ROOT=$ANDROID_NDK_HOME
+          export PATH=$ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/linux-x86_64/bin:$PATH
+          
           make -j$(nproc)
-          make install 
-
-      - name: CPack
+          make install
+      
+      - name: Package OpenSSL
         if: matrix.package_generator != ''
-        working-directory: ./build
         run: |
-          cpack -C ${{matrix.build_type}} -G ${{matrix.package_generator}}
-
+          mkdir -p build
+          cd build
+          
+          # Create a simple CMakeLists.txt to use CPack
+          echo "cmake_minimum_required(VERSION 3.10)" > CMakeLists.txt
+          echo "project(OpenSSL)" >> CMakeLists.txt
+          echo "set(CPACK_PACKAGE_NAME \"openssl-android-${{ matrix.android_abi }}\")" >> CMakeLists.txt
+          echo "set(CPACK_GENERATOR \"${{ matrix.package_generator }}\")" >> CMakeLists.txt
+          echo "set(CPACK_SOURCE_GENERATOR \"${{ matrix.package_generator }}\")" >> CMakeLists.txt
+          echo "include(CPack)" >> CMakeLists.txt
+          
+          # Copy OpenSSL files to package
+          mkdir -p openssl
+          cp -r ${{ env.OUTPUT_DIR }}/* openssl/
+          
+          # Generate the package
+          cmake .
+          cpack -C ${{ matrix.build_type }}
+      
       - name: Publish Snapshot Release
         uses: softprops/action-gh-release@v1
         if: ${{ (github.ref == 'refs/heads/main') && matrix.package_generator != '' }}
         with:
           tag_name: "snapshot-${{ github.sha }}"
           files: |
-            build/*-*${{ matrix.build_type }}*-*.*
-
+            build/openssl-android-${{ matrix.android_abi }}-*.*
+      
       - name: Publish Tagged Release
         uses: softprops/action-gh-release@v1
         if: ${{ startsWith(github.ref, 'refs/tags/') && matrix.package_generator != '' }}
         with:
           files: |
-            build/*-*${{ matrix.build_type }}*-*.*
+            build/openssl-android-${{ matrix.android_abi }}-*.*
