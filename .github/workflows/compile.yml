@@ -89,14 +89,14 @@ jobs:
         working-directory: openssl
         run: |
           make -j$(nproc)
-          make install_sw
-      
+          make install_sw 
+
       - name: Package OpenSSL binaries
         run: |
           mkdir -p artifacts
           tar -czvf artifacts/openssl-android-${{ matrix.android_abi }}-no-asm.tar.gz -C output ${{ matrix.android_abi }}     
 
-        - name: CPack
+      - name: CPack
         if: matrix.package_generator != ''
         working-directory: ./build
         run: |
