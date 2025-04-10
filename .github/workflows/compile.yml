@@ -5,7 +5,7 @@ on:
       openssl_branch:
         description: 'OpenSSL branch/tag to build'
         required: true
-        default: 'openssl-3.5'
+        default: 'openssl-3.4'
         type: string
   schedule:
     - cron: '0 0 * * *'  # Run daily at midnight UTC
@@ -159,6 +159,5 @@ jobs:
           name: "OpenSSL for Android ${{ env.OPENSSL_BRANCH }}"
           body: |
             Release build of OpenSSL ${{ env.OPENSSL_BRANCH }} for Android
-            Architecture: ${{ matrix.android_abi }}
           files: |
             ${{ env.PACKAGE_DIR }}/openssl-android-${{ matrix.android_abi }}-*.zip
