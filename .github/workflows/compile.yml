@@ -161,6 +161,8 @@ jobs:
           name: "OpenSSL for Android - Daily Build"
           body: |
             Automated daily build of OpenSSL ${{ env.OPENSSL_BRANCH }} for Android
+
+            This build includes binaries for Android (armeabi-v7a, arm64-v8a)
             
             **Note:** This snapshot may be overwritten by newer daily builds.
           files: |
