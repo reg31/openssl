@@ -93,7 +93,7 @@ jobs:
           no-dtls no-afalgeng no-capieng no-cmp no-cms no-comp no-ct \
           no-dgram no-dso no-engine no-filenames no-gost \
           no-http no-module no-nextprotoneg no-padlockeng no-sock \
-          no-srp no-srtp no-ssl-trace no-static-engine no-ts \
+          no-srp no-srtp no-ssl-trace no-ts \
           no-ui-console no-uplink no-ssl3-method no-tls1-method no-tls1_1-method \
           no-dtls1-method no-dtls1_2-method no-argon2 no-bf no-blake2 no-cast no-cmac \
           no-dsa no-idea no-md4 no-mdc2 no-ocb no-rc2 no-rc4 no-rmd160 no-scrypt \
@@ -103,7 +103,7 @@ jobs:
           no-external-tests no-fips no-fips-securitychecks no-fuzz-afl no-fuzz-libfuzzer \
           no-h3demo no-jitter no-ktls no-md2 no-msan no-pie no-rc5 no-sctp \
           no-ssl no-static-engine no-tfo no-trace no-ubsan no-unit-test \
-          no-winstore no-zlib no-zlib-dynamic no-zstd no-zstd-dynamic \
+          no-winstore no-zlib no-zlib-dynamic no-zstd no-zstd-dynamic no-deprecated \
             --prefix=${{ env.OUTPUT_DIR }} \
             --openssldir=${{ env.OUTPUT_DIR }}
       
