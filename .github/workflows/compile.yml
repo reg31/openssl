@@ -72,6 +72,7 @@ jobs:
         run: |
           echo "ANDROID_API=35" >> $GITHUB_ENV
           echo "OUTPUT_DIR=$(pwd)/output/${{ matrix.android_abi }}" >> $GITHUB_ENV
+          echo "PACKAGE_DIR=$(pwd)/build" >> $GITHUB_ENV
       
       - name: Configure OpenSSL for Android ${{ matrix.android_abi }}
         working-directory: openssl
@@ -101,11 +102,47 @@ jobs:
           make -j$(nproc)
           make install
       
-      - name: CPack
-        if: matrix.package_generator != ''
+      - name: Create CMake configuration for CPack
+        run: |
+          # Get OpenSSL version
+          OPENSSL_VERSION=$(cd openssl && ./config --version)
+          echo "Using OpenSSL version: $OPENSSL_VERSION"
+          
+          # Create a directory for packaging
+          mkdir -p ${{ env.PACKAGE_DIR }}
+          
+          # Create CMakeLists.txt for CPack
+          cat > ${{ env.OUTPUT_DIR }}/CMakeLists.txt << EOF
+          cmake_minimum_required(VERSION 3.10)
+          project(openssl-android-${{ matrix.android_abi }})
+          
+          # Set CPack properties
+          set(CPACK_PACKAGE_NAME "openssl-android-${{ matrix.android_abi }}")
+          set(CPACK_PACKAGE_VERSION "${OPENSSL_VERSION}")
+          set(CPACK_PACKAGE_VENDOR "OpenSSL")
+          set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "OpenSSL for Android ${{ matrix.android_abi }}")
+          set(CPACK_PACKAGE_FILE_NAME "openssl-android-${{ matrix.android_abi }}-${OPENSSL_VERSION}")
+          set(CPACK_OUTPUT_FILE_PREFIX "${{ env.PACKAGE_DIR }}")
+          
+          # Include all files in the output directory
+          install(DIRECTORY ${{ env.OUTPUT_DIR }}/
+                  DESTINATION .
+                  PATTERN "CMakeFiles" EXCLUDE
+                  PATTERN "CMakeLists.txt" EXCLUDE
+                  PATTERN "cmake_install.cmake" EXCLUDE
+                  PATTERN "Makefile" EXCLUDE)
+          
+          include(CPack)
+          EOF
+      
+      - name: Run CMake and CPack
         working-directory: ${{ env.OUTPUT_DIR }}
         run: |
-          cpack -C ${{matrix.build_type}} -G ${{matrix.package_generator}}
+          # Run CMake to generate the CPack configuration
+          cmake .
+          
+          # Run CPack with the specified generator
+          cpack -C ${{ matrix.build_type }} -G ${{ matrix.package_generator }}
       
       - name: Publish Snapshot Release
         uses: softprops/action-gh-release@v2
@@ -113,11 +150,11 @@ jobs:
         with:
           tag_name: "snapshot-${{ github.sha }}"
           files: |
-            build/openssl-android-${{ matrix.android_abi }}-*.*
+            ${{ env.PACKAGE_DIR }}/openssl-android-${{ matrix.android_abi }}-*.*
       
       - name: Publish Tagged Release
         uses: softprops/action-gh-release@v2
         if: ${{ startsWith(github.ref, 'refs/tags/') && matrix.package_generator != '' }}
         with:
           files: |
-            build/openssl-android-${{ matrix.android_abi }}-*.*
+            ${{ env.PACKAGE_DIR }}/openssl-android-${{ matrix.android_abi }}-*.*
