@@ -92,7 +92,7 @@ jobs:
           ./Configure ${{ matrix.openssl_target }} no-asm no-apps no-tests no-docs no-legacy \
           no-dtls no-capieng no-cmp no-cms no-comp no-ct \
           no-dgram no-dso no-engine no-filenames no-gost \
-          no-http no-module no-nextprotoneg no-padlockeng no-sock \
+          no-http no-module no-padlockeng no-sock \
           no-srp no-srtp no-ssl-trace no-ts \
           no-ui-console no-uplink no-ssl3-method no-tls1-method no-tls1_1-method \
           no-dtls1-method no-dtls1_2-method no-argon2 no-bf no-blake2 no-cast no-cmac \
@@ -104,7 +104,7 @@ jobs:
           no-h3demo no-jitter no-ktls no-md2 no-msan no-pie no-rc5 no-sctp \
           no-ssl no-static-engine no-tfo no-trace no-ubsan no-unit-test \
           no-winstore no-zlib no-zlib-dynamic no-zstd no-zstd-dynamic \
-          no-krb5 no-weak-ssl-ciphers \
+          no-krb5 no-weak-ssl-ciphers no-psk no-err no-srp no-ec2m \
             --prefix=${{ env.OUTPUT_DIR }} \
             --openssldir=${{ env.OUTPUT_DIR }}
       
