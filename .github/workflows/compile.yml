@@ -10,7 +10,7 @@ on:
         default: "master"
         type: string
   schedule:
-    - cron: '0 0 * * *'  # Run daily at midnight UTC
+    - cron: '0 0 * * 1,5'
   push:
     branches: [ main ]
   pull_request:
@@ -165,7 +165,7 @@ jobs:
           files: |
             ${{ env.PACKAGE_DIR }}/openssl-android-${{ matrix.android_abi }}-*.zip
           prerelease: true
-          delete_after: "3d"
+          delete_after: "7d"
       
       - name: Publish Tagged Release
         uses: softprops/action-gh-release@v2
