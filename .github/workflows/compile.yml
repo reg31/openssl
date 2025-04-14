@@ -2,15 +2,13 @@ name: Build OpenSSL for Android
 env:
   DEFAULT_OPENSSL_BRANCH: 'openssl-3.5'
 on:
-  workflow_dispatch:  # Manual trigger
+  workflow_dispatch:
     inputs:
       openssl_branch:
         description: 'OpenSSL branch/tag to build'
         required: true
         default: "master"
         type: string
-  #schedule:
-    #- cron: '0 0 * * 1,5'
   push:
     branches: [ main ]
   pull_request:
@@ -39,7 +37,7 @@ jobs:
         uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
-          java-version: '23'
+          java-version: '24'
       
       - name: Install dependencies
         run: |
@@ -53,20 +51,15 @@ jobs:
           curl -O https://dl.google.com/android/repository/android-ndk-r28-linux.zip
           unzip -q android-ndk-r28-linux.zip
           echo "ANDROID_NDK_HOME=${ANDROID_HOME}/ndk/android-ndk-r28" >> $GITHUB_ENV
-          
-          # Verify NDK installation
           ls -la ${ANDROID_HOME}/ndk/android-ndk-r28/toolchains/llvm/prebuilt/linux-x86_64/bin/
       
       - name: Clone OpenSSL
         run: |
           git clone https://github.com/openssl/openssl.git
           cd openssl
-          # Use the branch specified in workflow_dispatch input or default to master
           BRANCH_TO_USE="${{ github.event.inputs.openssl_branch || env.DEFAULT_OPENSSL_BRANCH }}"
           echo "Checking out OpenSSL branch/tag: $BRANCH_TO_USE"
           git checkout $BRANCH_TO_USE
-          
-          # Get OpenSSL version and save it
           echo "OPENSSL_BRANCH=$BRANCH_TO_USE" >> $GITHUB_ENV
       
       - name: Set up environment variables
@@ -80,13 +73,9 @@ jobs:
         working-directory: openssl
         run: |
           mkdir -p ${{ env.OUTPUT_DIR }}
-          
-          # Set up NDK environment variables properly
           export ANDROID_NDK_ROOT=$ANDROID_NDK_HOME
           export PATH=$ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/linux-x86_64/bin:$PATH
-          
-          # Use a single, correct Configure command
-          ./Configure ${{ matrix.openssl_target }} no-asm no-apps no-tests no-docs no-legacy \
+          COMMON_OPTS="no-apps no-tests no-docs no-legacy \
           no-dtls no-capieng no-cmp no-cms no-comp no-ct \
           no-dgram no-dso no-engine no-filenames no-gost \
           no-http no-module no-padlockeng no-sock \
@@ -101,53 +90,41 @@ jobs:
           no-h3demo no-jitter no-ktls no-md2 no-msan no-pie no-rc5 no-sctp \
           no-ssl no-static-engine no-tfo no-trace no-ubsan no-unit-test \
           no-winstore no-zlib no-zlib-dynamic no-zstd no-zstd-dynamic \
-          no-weak-ssl-ciphers no-psk no-err no-srp no-ec2m no-tls-deprecated-ec \
+          no-weak-ssl-ciphers no-psk no-err no-srp no-ec2m no-tls-deprecated-ec"
+          if [ "${{ matrix.arch }}" = "arm" ]; then
+            OPTS="$COMMON_OPTS no-asm"
+          else
+            OPTS="$COMMON_OPTS"
+          fi
+          ./Configure ${{ matrix.openssl_target }} $OPTS \
             --prefix=${{ env.OUTPUT_DIR }} \
             --openssldir=${{ env.OUTPUT_DIR }}
       
       - name: Build OpenSSL
         working-directory: openssl
         run: |
-          # Set up NDK environment variables properly
           export ANDROID_NDK_ROOT=$ANDROID_NDK_HOME
           export PATH=$ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/linux-x86_64/bin:$PATH
-          
           make -j$(nproc)
           make install
           
       - name: Package .so files
         run: |
           mkdir -p ${{ env.PACKAGE_DIR }}
-          
-          # Create a directory structure that matches what we want in the zip
           TEMP_DIR=$(mktemp -d)
           mkdir -p $TEMP_DIR/lib/${{ matrix.android_abi }}
-          
-          # Find the libssl and libcrypto .so files
           LIBSSL=$(find ${{ env.OUTPUT_DIR }} -name "libssl*.so" -type f)
           LIBCRYPTO=$(find ${{ env.OUTPUT_DIR }} -name "libcrypto*.so" -type f)
-
-          # Strip the libraries
           llvm-strip --strip-all $LIBSSL
           llvm-strip --strip-all $LIBCRYPTO
-          
-          # Copy and rename the .so files
           cp $LIBSSL $TEMP_DIR/lib/${{ matrix.android_abi }}/libssl_3.so
           cp $LIBCRYPTO $TEMP_DIR/lib/${{ matrix.android_abi }}/libcrypto_3.so
-          
-          # Also copy includes for a complete package
           mkdir -p $TEMP_DIR/include
           cp -r ${{ env.OUTPUT_DIR }}/include/* $TEMP_DIR/include/
-          
-          # Create zip file
           PACKAGE_NAME="openssl-android-${{ matrix.android_abi }}-${{ env.OPENSSL_BRANCH }}"
           cd $TEMP_DIR
           zip -r ${{ env.PACKAGE_DIR }}/$PACKAGE_NAME.zip .
-          
-          # Also create a tar.gz file as an alternative
           tar -czf ${{ env.PACKAGE_DIR }}/$PACKAGE_NAME.tar.gz .
-          
-          # List the created packages
           ls -la ${{ env.PACKAGE_DIR }}/
       
       - name: Publish Daily Snapshot Release
