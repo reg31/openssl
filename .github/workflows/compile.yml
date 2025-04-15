@@ -83,12 +83,12 @@ jobs:
           no-dsa no-idea no-md4 no-mdc2 no-ocb no-rc2 no-rc4 no-rmd160 no-scrypt \
           no-siphash no-siv no-sm2 no-sm3 no-sm4 no-whirlpool no-camellia \
           no-afalgeng no-acvp-tests no-brotli no-brotli-dynamic no-buildtest-c++ \
-          no-crypto-mdebug no-demos no-devcryptoeng no-egd no-dh \
+          no-crypto-mdebug no-demos no-devcryptoeng no-egd no-dh no-seed \
           no-external-tests no-fips no-fips-securitychecks no-fuzz-afl no-fuzz-libfuzzer \
           no-h3demo no-jitter no-ktls no-md2 no-msan no-pie no-rc5 no-sctp \
           no-ssl no-static-engine no-tfo no-trace no-ubsan no-unit-test \
           no-winstore no-zlib no-zlib-dynamic no-zstd no-zstd-dynamic no-des \
-          no-weak-ssl-ciphers no-psk no-err no-srp no-ec2m no-tls-deprecated-ec"
+          no-weak-ssl-ciphers no-psk no-err no-srp no-ec2m"
           if [ "${{ matrix.arch }}" = "arm" ]; then
             OPTS="$COMMON_OPTS no-asm"
           else
