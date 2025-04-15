@@ -96,7 +96,8 @@ jobs:
           fi
           ./Configure ${{ matrix.openssl_target }} $OPTS \
             --prefix=${{ env.OUTPUT_DIR }} \
-            --openssldir=${{ env.OUTPUT_DIR }}
+            --openssldir=${{ env.OUTPUT_DIR }} \
+            -O3 -DNDEBUG
       
       - name: Build OpenSSL
         working-directory: openssl
