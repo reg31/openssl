@@ -79,7 +79,7 @@ jobs:
           no-bf no-blake2 no-brotli no-brotli-dynamic no-buildtest-c++ no-bulk no-cached-fetch \
           no-camellia no-capieng no-cast no-chacha no-cmac no-cmp no-cms no-comp \
           no-crypto-mdebug no-ct no-demos no-deprecated no-des no-devcryptoeng no-dgram \
-          no-docs no-dsa no-dso no-dtls no-dtls1 no-dtls1-method no-dtls1_2-method no-dtls1_3-method \
+          no-docs no-dsa no-dso no-dtls no-dtls1 no-dtls1-method no-dtls1_2-method \
           no-ecdh no-ecdsa no-ec2m no-egd no-engine no-err no-external-tests \
           no-filenames no-fips no-fips-securitychecks no-fuzz-afl no-fuzz-libfuzzer \
           no-gost no-h3demo no-hqinterop no-http no-idea no-jitter \
