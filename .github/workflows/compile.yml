@@ -90,7 +90,7 @@ jobs:
           no-static-engine no-tests no-tfo no-tls-deprecated-ec no-tls1_1 \
           no-tls1_1-method no-trace no-ts no-ubsan no-ui-console no-unit-test \
           no-uplink no-weak-ssl-ciphers no-whirlpool no-winstore no-zlib \
-          no-psk no-rc2 no-rc4 no-rc5 no-rfc3779 no-zlib-dynamic no-zstd no-zstd-dynamic"
+          no-psk no-rc2 no-rc4 no-rc5 no-rfc3779 no-zlib-dynamic no-zstd no-zstd-dynamic shared"
           if [ "${{ matrix.arch }}" = "arm" ]; then
             OPTS="$COMMON_OPTS no-asm"
           else
