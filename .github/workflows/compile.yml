@@ -76,21 +76,21 @@ jobs:
           export ANDROID_NDK_ROOT=$ANDROID_NDK_HOME
           export PATH=$ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/linux-x86_64/bin:$PATH
           COMMON_OPTS="no-acvp-tests no-afalgeng no-apps no-argon2 no-aria no-asan no-autoerrinit \
-          no-bf no-blake2 no-brotli no-brotli-dynamic no-buildtest-c++ no-bulk no-cached-fetch \
-          no-camellia no-capieng no-cast no-chacha no-cmac no-cmp no-cms no-comp \
+          no-bf no-blake2 no-brotli no-brotli-dynamic no-buildtest-c++ no-bulk \
+          no-camellia no-capieng no-cast no-chacha no-cmp no-cms no-comp \
           no-crypto-mdebug no-ct no-demos no-des no-devcryptoeng no-dgram \
           no-docs no-dsa no-dtls no-dtls1 no-dtls1-method no-dtls1_2-method \
           no-ecdh no-ecdsa no-ec2m no-egd no-engine no-err no-external-tests \
           no-filenames no-fips no-fips-securitychecks no-fuzz-afl no-fuzz-libfuzzer \
           no-gost no-h3demo no-hqinterop no-http no-idea no-jitter no-seed \
-          no-ktls no-legacy no-makedepend no-md2 no-md4 no-mdc2 no-msan \
-          no-nextprotoneg no-ocb no-padlockeng no-poly1305 \
+          no-ktls no-legacy no-md2 no-md4 no-mdc2 no-msan \
+          no-nextprotoneg no-ocb no-padlockeng no-poly1305 no-posix-io \
           no-rmd160 no-scrypt no-sctp no-siphash no-siv no-sm2 no-sm2-precomp \
           no-sm3 no-sm4 no-sock no-srp no-srtp no-ssl no-ssl-trace no-ssl3-method \
           no-static-engine no-tests no-tfo no-tls-deprecated-ec no-tls1_1 \
           no-tls1_1-method no-trace no-ts no-ubsan no-ui-console no-unit-test \
           no-uplink no-weak-ssl-ciphers no-whirlpool no-winstore no-zlib \
-          no-psk no-rc2 no-rc4 no-rc5 no-rfc3779 no-zlib-dynamic no-zstd no-zstd-dynamic shared"
+          no-psk no-rc2 no-rc4 no-rc5 no-rfc3779 no-zlib-dynamic no-zstd no-zstd-dynamic"
           if [ "${{ matrix.arch }}" = "arm" ]; then
             OPTS="$COMMON_OPTS no-asm"
           else
