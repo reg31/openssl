@@ -99,6 +99,11 @@ jobs:
           ./Configure ${{ matrix.openssl_target }} $OPTS \
             --prefix=${{ env.OUTPUT_DIR }} \
             --openssldir=${{ env.OUTPUT_DIR }}
+
+          # Output configdata.pm for debugging
+          echo "========= CONFIGDATA.PM CONTENTS ========="
+          cat configdata.pm
+          echo "=========================================="
       
       - name: Build OpenSSL
         working-directory: openssl
