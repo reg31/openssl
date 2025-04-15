@@ -86,7 +86,7 @@ jobs:
           no-crypto-mdebug no-demos no-devcryptoeng no-egd no-ripemd no-dh \
           no-external-tests no-fips no-fips-securitychecks no-fuzz-afl no-fuzz-libfuzzer \
           no-h3demo no-jitter no-ktls no-md2 no-msan no-pie no-rc5 no-sctp \
-          no-ssl no-static-engine no-tfo no-trace no-ubsan no-unit-test no-krb5 \
+          no-ssl no-static-engine no-tfo no-trace no-ubsan no-unit-test \
           no-winstore no-zlib no-zlib-dynamic no-zstd no-zstd-dynamic no-des \
           no-weak-ssl-ciphers no-psk no-err no-srp no-ec2m no-tls-deprecated-ec"
           if [ "${{ matrix.arch }}" = "arm" ]; then
