@@ -83,7 +83,7 @@ jobs:
           no-dsa no-idea no-md4 no-mdc2 no-ocb no-rc2 no-rc4 no-rmd160 no-scrypt \
           no-siphash no-siv no-sm2 no-sm3 no-sm4 no-whirlpool no-camellia "no-seed" \
           no-afalgeng no-acvp-tests no-brotli no-brotli-dynamic no-buildtest-c++ \
-          no-crypto-mdebug no-demos no-devcryptoeng no-egd no-ripemd no-dh \
+          no-crypto-mdebug no-demos no-devcryptoeng no-egd no-dh \
           no-external-tests no-fips no-fips-securitychecks no-fuzz-afl no-fuzz-libfuzzer \
           no-h3demo no-jitter no-ktls no-md2 no-msan no-pie no-rc5 no-sctp \
           no-ssl no-static-engine no-tfo no-trace no-ubsan no-unit-test \
