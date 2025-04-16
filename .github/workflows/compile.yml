@@ -99,7 +99,7 @@ jobs:
           ./Configure ${{ matrix.openssl_target }} $OPTS \
             --prefix=${{ env.OUTPUT_DIR }} \
             --openssldir=${{ env.OUTPUT_DIR }} \
-            OPENSSL_API_COMPAT=0x10100000L
+            --api=1.1.0
       
       - name: Build OpenSSL
         working-directory: openssl
