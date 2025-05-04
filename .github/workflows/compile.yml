@@ -9,6 +9,8 @@ on:
         required: true
         default: "openssl-3.5"
         type: string
+  schedule:
+    - cron: '0 0 * * *'
   push:
     branches: [ main ]
   pull_request:
@@ -127,10 +129,10 @@ jobs:
           ls -la ${{ env.PACKAGE_DIR }}/
       
       - name: Publish Daily Snapshot Release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v2.2.2
         if: ${{ github.ref == 'refs/heads/main' || github.event_name == 'schedule' }}
         with:
-          tag_name: ${{ env.SNAPSHOT_TAG }}
+          tag_name: ${{ github.run_id }}
           name: "OpenSSL for Android - Daily Build"
           body: |
             Automated daily build of OpenSSL ${{ env.OPENSSL_BRANCH }} for Android
