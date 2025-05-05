@@ -46,15 +46,6 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y build-essential git perl make curl llvm
       
-      - name: Download NDK
-        run: |
-          mkdir -p ${ANDROID_HOME}/ndk
-          cd ${ANDROID_HOME}/ndk
-          curl -O https://dl.google.com/android/repository/android-ndk-r28b-linux.zip
-          unzip -q android-ndk-r28b-linux.zip
-          echo "ANDROID_NDK_HOME=${ANDROID_HOME}/ndk/android-ndk-r28b" >> $GITHUB_ENV
-          ls -la ${ANDROID_HOME}/ndk/android-ndk-r28b/toolchains/llvm/prebuilt/linux-x86_64/bin/
-      
       - name: Clone OpenSSL
         run: |
           git clone https://github.com/openssl/openssl.git
@@ -75,8 +66,6 @@ jobs:
         working-directory: openssl
         run: |
           mkdir -p ${{ env.OUTPUT_DIR }}
-          export ANDROID_NDK_ROOT=$ANDROID_NDK_HOME
-          export PATH=$ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/linux-x86_64/bin:$PATH
           COMMON_OPTS="no-acvp-tests no-afalgeng no-apps no-argon2 no-aria no-asan no-autoerrinit \
           no-bf no-blake2 no-brotli no-brotli-dynamic no-buildtest-c++ \
           no-camellia no-capieng no-cast no-chacha no-cmp no-cms no-comp no-crypto-mdebug no-ct no-demos \
@@ -104,8 +93,8 @@ jobs:
       - name: Build OpenSSL
         working-directory: openssl
         run: |
-          export ANDROID_NDK_ROOT=$ANDROID_NDK_HOME
-          export PATH=$ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/linux-x86_64/bin:$PATH
+          export ANDROID_NDK_ROOT=$ANDROID_NDK_LATEST_HOME
+          export PATH=$ANDROID_NDK_LATEST_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin:$PATH
           make -j$(nproc)
           make install
           
