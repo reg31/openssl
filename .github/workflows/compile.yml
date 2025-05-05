@@ -66,6 +66,7 @@ jobs:
         working-directory: openssl
         run: |
           mkdir -p ${{ env.OUTPUT_DIR }}
+          export PATH=$ANDROID_NDK_LATEST_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin:$PATH
           COMMON_OPTS="no-acvp-tests no-afalgeng no-apps no-argon2 no-aria no-asan no-autoerrinit \
           no-bf no-blake2 no-brotli no-brotli-dynamic no-buildtest-c++ \
           no-camellia no-capieng no-cast no-chacha no-cmp no-cms no-comp no-crypto-mdebug no-ct no-demos \
@@ -93,8 +94,6 @@ jobs:
       - name: Build OpenSSL
         working-directory: openssl
         run: |
-          export ANDROID_NDK_ROOT=$ANDROID_NDK_LATEST_HOME
-          export PATH=$ANDROID_NDK_LATEST_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin:$PATH
           make -j$(nproc)
           make install
           
