@@ -103,11 +103,17 @@ jobs:
           TEMP_DIR=$(mktemp -d)
           mkdir -p $TEMP_DIR/lib/${{ matrix.android_abi }}
           LIBSSL=$(find ${{ env.OUTPUT_DIR }} -name "libssl*.so" -type f)
-          LIBCRYPTO=$(find ${{ env.OUTPUT_DIR }} -name "libcrypto*.so" -type f)
+          LIBCRYPTOA=$(find ${{ env.OUTPUT_DIR }} -name "libcrypto*.so" -type f)
+          LIBSSLA=$(find ${{ env.OUTPUT_DIR }} -name "libssl*.a" -type f)
+          LIBCRYPTO=$(find ${{ env.OUTPUT_DIR }} -name "libcrypto*.a" -type f)
           llvm-strip --strip-all $LIBSSL
           llvm-strip --strip-all $LIBCRYPTO
           cp $LIBSSL $TEMP_DIR/lib/libssl_3.so
           cp $LIBCRYPTO $TEMP_DIR/lib/libcrypto_3.so
+          cp $LIBSSLA $TEMP_DIR/lib/libssl.a
+          cp $LIBCRYPTOA $TEMP_DIR/lib/libcrypto.a
+          cp $LIBSSL $TEMP_DIR/lib/libssl.so
+          cp $LIBCRYPTO $TEMP_DIR/lib/libcrypto.so
           mkdir -p $TEMP_DIR/include
           cp -r ${{ env.OUTPUT_DIR }}/include/openssl/* $TEMP_DIR/include/
           PACKAGE_NAME="openssl-android-${{ matrix.android_abi }}-${{ env.OPENSSL_BRANCH }}"
