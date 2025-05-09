@@ -116,7 +116,7 @@ jobs:
           cp $LIBCRYPTO $TEMP_DIR/lib/libcrypto.so
           mkdir -p $TEMP_DIR/include
           cp -r openssl/include/* $TEMP_DIR/include/
-          PACKAGE_NAME="openssl-android-${{ matrix.android_abi }}-${{ env.OPENSSL_BRANCH }}"
+          PACKAGE_NAME="openssl-android-${{ matrix.android_abi }}"
           cd $TEMP_DIR
           zip -r ${{ env.PACKAGE_DIR }}/$PACKAGE_NAME.zip .
           tar -czf ${{ env.PACKAGE_DIR }}/$PACKAGE_NAME.tar.gz .
