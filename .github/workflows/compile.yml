@@ -136,7 +136,6 @@ jobs:
             **Note:** This snapshot may be overwritten by newer daily builds.
           files: |
             ${{ env.PACKAGE_DIR }}/openssl-android-${{ matrix.android_abi }}-*.zip
-          prerelease: true
           
       - name: Cleanup repository
         uses: dev-drprasad/delete-older-releases@v0.3.4
