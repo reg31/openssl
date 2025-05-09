@@ -106,10 +106,10 @@ jobs:
           LIBCRYPTO=$(find ${{ env.OUTPUT_DIR }} -name "libcrypto*.so" -type f)
           llvm-strip --strip-all $LIBSSL
           llvm-strip --strip-all $LIBCRYPTO
-          cp $LIBSSL $TEMP_DIR/lib/${{ matrix.android_abi }}/libssl_3.so
-          cp $LIBCRYPTO $TEMP_DIR/lib/${{ matrix.android_abi }}/libcrypto_3.so
+          cp $LIBSSL $TEMP_DIR/lib/libssl_3.so
+          cp $LIBCRYPTO $TEMP_DIR/lib/libcrypto_3.so
           mkdir -p $TEMP_DIR/include
-          cp -r ${{ env.OUTPUT_DIR }}/include/* $TEMP_DIR/include/
+          cp -r ${{ env.OUTPUT_DIR }}/include/openssl/* $TEMP_DIR/include/
           PACKAGE_NAME="openssl-android-${{ matrix.android_abi }}-${{ env.OPENSSL_BRANCH }}"
           cd $TEMP_DIR
           zip -r ${{ env.PACKAGE_DIR }}/$PACKAGE_NAME.zip .
