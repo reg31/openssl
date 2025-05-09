@@ -101,7 +101,7 @@ jobs:
         run: |
           mkdir -p ${{ env.PACKAGE_DIR }}
           TEMP_DIR=$(mktemp -d)
-          mkdir -p $TEMP_DIR/lib/${{ matrix.android_abi }}
+          mkdir -p $TEMP_DIR/lib
           LIBSSL=$(find ${{ env.OUTPUT_DIR }} -name "libssl*.so" -type f)
           LIBCRYPTOA=$(find ${{ env.OUTPUT_DIR }} -name "libcrypto*.so" -type f)
           LIBSSLA=$(find ${{ env.OUTPUT_DIR }} -name "libssl*.a" -type f)
