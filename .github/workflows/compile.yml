@@ -1,13 +1,13 @@
 name: Build OpenSSL for Android
 env:
-  DEFAULT_OPENSSL_BRANCH: 'openssl-3.5'
+  DEFAULT_OPENSSL_BRANCH: 'openssl-3.4'
 on:
   workflow_dispatch:
     inputs:
       openssl_branch:
         description: 'OpenSSL branch/tag to build'
         required: true
-        default: "openssl-3.5"
+        default: "openssl-3.4"
         type: string
   schedule:
     - cron: '0 0 * * *'
