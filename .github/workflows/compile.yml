@@ -37,12 +37,7 @@ jobs:
         with:
           distribution: 'temurin'
           java-version: '24'
-      
-      - name: Install dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y build-essential git perl make curl llvm
-      
+          
       - name: Clone OpenSSL
         run: |
           git clone https://github.com/openssl/openssl.git
