@@ -87,7 +87,8 @@ jobs:
         working-directory: openssl
         run: |
           export ANDROID_NDK_ROOT=$ANDROID_NDK_LATEST_HOME
-          export PATH=$ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/linux-x86_64/bin:$PATH
+          export ANDROID_NDK_BIN=$ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/linux-x86_64/bin
+          export PATH=$ANDROID_NDK_BIN:$PATH
           make -j$(nproc)
           make install
           
@@ -100,8 +101,8 @@ jobs:
           LIBCRYPTO=$(find ${{ env.OUTPUT_DIR }} -name "libcrypto*.so" -type f)
           LIBSSLA=$(find ${{ env.OUTPUT_DIR }} -name "libssl*.a" -type f)
           LIBCRYPTOA=$(find ${{ env.OUTPUT_DIR }} -name "libcrypto*.a" -type f)
-          llvm-strip --strip-all $LIBSSL
-          llvm-strip --strip-all $LIBCRYPTO
+          $ANDROID_NDK_BIN/llvm-strip --strip-all $LIBSSL
+          $ANDROID_NDK_BIN/llvm-strip --strip-all $LIBCRYPTO
           cp $LIBSSL $TEMP_DIR/lib/libssl_3.so
           cp $LIBCRYPTO $TEMP_DIR/lib/libcrypto_3.so
           cp $LIBSSLA $TEMP_DIR/lib/libssl.a
