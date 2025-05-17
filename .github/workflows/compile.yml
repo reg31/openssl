@@ -103,6 +103,8 @@ jobs:
           LIBCRYPTOA=$(find ${{ env.OUTPUT_DIR }} -name "libcrypto*.a" -type f)
           $ANDROID_NDK_BIN/llvm-strip --strip-all $LIBSSL
           $ANDROID_NDK_BIN/llvm-strip --strip-all $LIBCRYPTO
+          $ANDROID_NDK_BIN/llvm-strip --strip-all $LIBSSLA
+          $ANDROID_NDK_BIN/llvm-strip --strip-all $LIBCRYPTOA
           cp $LIBSSL $TEMP_DIR/lib/libssl_3.so
           cp $LIBCRYPTO $TEMP_DIR/lib/libcrypto_3.so
           cp $LIBSSLA $TEMP_DIR/lib/libssl.a
