@@ -64,7 +64,7 @@ jobs:
           no-bf no-blake2 no-brotli no-brotli-dynamic no-buildtest-c++ \
           no-camellia no-capieng no-cast no-chacha no-cmp no-cms no-comp no-crypto-mdebug no-ct no-demos \
           no-devcryptoeng no-docs no-dtls no-dtls1 no-dtls1-method no-dtls1_2-method \
-          no-ecdh no-ecdsa no-ec2m no-egd no-engine no-err no-external-tests no-doc \
+          no-ecdh no-ecdsa no-ec2m no-egd no-engine no-err no-external-test \
           no-filenames no-fips no-fips-securitychecks no-fuzz-afl no-fuzz-libfuzzer \
           no-gost no-h3demo no-idea no-jitter no-seed no-hqinterop no-tls-deprecated-ec \
           no-ktls no-legacy no-md2 no-md4 no-mdc2 no-msan no-deprecated no-ocb no-padlockeng \
