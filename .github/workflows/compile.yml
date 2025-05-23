@@ -91,10 +91,10 @@ jobs:
           make -j$(nproc)
           make install
           
-      - name: Package .so files
+      - name: Strip .so files
         run: |
           mkdir -p ${{ env.PACKAGE_DIR }}
-          TEMP_DIR=$(mktemp -d)
+          TEMP_DIR=$(pwd)/package
           mkdir -p $TEMP_DIR/lib
           export ANDROID_NDK_BIN=$ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/linux-x86_64/bin
           LIBSSL=$(find ${{ env.OUTPUT_DIR }} -name "libssl*.so" -type f)
@@ -113,31 +113,46 @@ jobs:
           cp $LIBCRYPTO $TEMP_DIR/lib/libcrypto.so
           mkdir -p $TEMP_DIR/include
           cp -r openssl/include/* $TEMP_DIR/include/
-          PACKAGE_NAME="openssl-android-${{ matrix.android_abi }}"
-          cd $TEMP_DIR
-          zip -r ${{ env.PACKAGE_DIR }}/$PACKAGE_NAME.zip .
-          tar -czf ${{ env.PACKAGE_DIR }}/$PACKAGE_NAME.tar.gz .
-          ls -la ${{ env.PACKAGE_DIR }}/
-      
-      - name: Publish Daily Snapshot Release
-        uses: softprops/action-gh-release@v2
-        if: ${{ github.ref == 'refs/heads/main' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' }}
-        with:
-          tag_name: ${{ github.run_id }}
-          name: "OpenSSL for Android - Daily Build"
-          body: |
-            Automated daily build of OpenSSL ${{ env.OPENSSL_BRANCH }} for Android
 
-            This build includes binaries for Android (armeabi-v7a, arm64-v8a)
-            
-            **Note:** This snapshot may be overwritten by newer daily builds.
-          files: |
-            ${{ env.PACKAGE_DIR }}/openssl-android-${{ matrix.android_abi }}.zip
-          
-      - name: Cleanup repository
-        uses: dev-drprasad/delete-older-releases@v0.3.4
+      - name: Package artifacts
+        shell: cmd
+        run: 7z a "openssl-android-${{ matrix.android_abi }}.zip" .\package\*
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
         with:
-          keep_latest: 3
-          delete_tags: true
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          name: openssl-builds
+          path: openssl-android-${{ matrix.android_abi }}.zip
+
+  release:
+      needs: [build-openssl-android]
+      runs-on: ubuntu-latest
+      if: ${{ github.ref == 'refs/heads/main' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' }}
+      steps:
+        - name: Download all artifacts
+          uses: actions/download-artifact@v4
+          with:
+            path: openssl-builds
+          
+        - name: Publish Daily Snapshot Release
+          uses: softprops/action-gh-release@v2
+          if: ${{ github.ref == 'refs/heads/main' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' }}
+          with:
+            tag_name: ${{ github.run_id }}
+            name: "OpenSSL for Android - Daily Build"
+            body: |
+              Automated daily build of OpenSSL ${{ env.OPENSSL_BRANCH }} for Android
+  
+              This build includes binaries for Android (armeabi-v7a, arm64-v8a)
+              
+              **Note:** This snapshot may be overwritten by newer daily builds.
+            files: |
+              ${{ env.PACKAGE_DIR }}/openssl-android-${{ matrix.android_abi }}.zip
+            
+        - name: Cleanup repository
+          uses: dev-drprasad/delete-older-releases@v0.3.4
+          with:
+            keep_latest: 3
+            delete_tags: true
+          env:
+            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
