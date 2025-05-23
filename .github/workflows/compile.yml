@@ -121,7 +121,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: openssl-android-${{ matrix.android_abi }}
-          path: openssl-android-${{ matrix.android_abi }}.zip
+          path: ${{ env.OPENSSL_BRANCH }}-${{ matrix.android_abi }}.zip
 
   release:
       needs: [build-openssl-android]
