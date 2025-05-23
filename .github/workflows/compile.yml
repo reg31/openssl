@@ -93,7 +93,7 @@ jobs:
           
       - name: Strip .so files
         run: |
-          TEMP_DIR=${{ env.PACKAGE_DIR }}/package
+          TEMP_DIR=${{ env.PACKAGE_DIR }}
           mkdir -p $TEMP_DIR/lib
           export ANDROID_NDK_BIN=$ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/linux-x86_64/bin
           LIBSSL=$(find ${{ env.OUTPUT_DIR }} -name "libssl*.so" -type f)
