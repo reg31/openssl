@@ -115,7 +115,6 @@ jobs:
           cp -r openssl/include/* $TEMP_DIR/include/
 
       - name: Package artifacts
-        shell: cmd
         run: 7z a "openssl-android-${{ matrix.android_abi }}.zip" .\package\*
 
       - name: Upload build artifact
