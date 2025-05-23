@@ -93,8 +93,7 @@ jobs:
           
       - name: Strip .so files
         run: |
-          mkdir -p ${{ env.PACKAGE_DIR }}
-          TEMP_DIR=$(pwd)/package
+          TEMP_DIR=${{ env.PACKAGE_DIR }}/package
           mkdir -p $TEMP_DIR/lib
           export ANDROID_NDK_BIN=$ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/linux-x86_64/bin
           LIBSSL=$(find ${{ env.OUTPUT_DIR }} -name "libssl*.so" -type f)
@@ -115,7 +114,7 @@ jobs:
           cp -r openssl/include/* $TEMP_DIR/include/
 
       - name: Package artifacts
-        run: 7z a "openssl-android-${{ matrix.android_abi }}.zip" $(pwd)/package/*
+        run: 7z a "openssl-android-${{ matrix.android_abi }}.zip" ${{ env.PACKAGE_DIR }}/*
 
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
