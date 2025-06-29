@@ -121,6 +121,7 @@ jobs:
         with:
           name: openssl-android-${{ matrix.android_abi }}
           path: ${{ env.OPENSSL_BRANCH }}-${{ matrix.android_abi }}.zip
+          retention-days: 5
 
   release:
       needs: [build-openssl-android]
