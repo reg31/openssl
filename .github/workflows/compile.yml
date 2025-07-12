@@ -72,7 +72,7 @@ jobs:
           no-sm3 no-sm4 no-srp no-srtp  no-ssl no-ssl-trace no-ssl3-method no-static-engine \
           no-tfo no-tls1_1 no-tls1_1-method no-trace no-ts no-ubsan no-ui-console no-unit-test \ 
           no-uplink no-weak-ssl-ciphers no-whirlpool no-winstore no-zlib no-tests no-ecx \
-          no-http no-integrity-only-ciphers ml-dsa no-ml-kem no-lms no-external-tests no-sslkeylog no-unstable-qlog no-dynamic-engine  no-stdio \
+          no-http no-integrity-only-ciphers no-ml-dsa no-ml-kem no-lms no-external-tests no-sslkeylog no-unstable-qlog no-dynamic-engine no-stdio \
           no-rc4 no-rc5 no-rfc3779 no-zlib-dynamic no-zstd no-zstd-dynamic -DOPENSSL_NO_DEPRECATED_1_1_0"
           if [ "${{ matrix.arch }}" = "arm" ]; then
             OPTS="$COMMON_OPTS no-asm"
