@@ -88,10 +88,9 @@ jobs:
       - name: Build OpenSSL
         working-directory: openssl
         run: |
-          export CC=-O3
           export ANDROID_NDK_ROOT=$ANDROID_NDK_LATEST_HOME
           export PATH=$ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/linux-x86_64/bin:$PATH
-          make -j$(nproc)
+          make -j$(nproc) CFLAGS=-O3 CXXFLAGS=-O3
           make install
           
       - name: Strip .so files
