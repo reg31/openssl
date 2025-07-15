@@ -90,7 +90,7 @@ jobs:
         run: |
           export ANDROID_NDK_ROOT=$ANDROID_NDK_LATEST_HOME
           export PATH=$ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/linux-x86_64/bin:$PATH
-          make -j$(nproc) CFLAGS="-O3 -fpic" CXXFLAGS="-O3 -fpic"
+          make -j$(nproc)
           make install
           
       - name: Strip .so files
