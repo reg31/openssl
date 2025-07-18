@@ -1,13 +1,13 @@
 name: Build OpenSSL for Android
 env:
-  DEFAULT_OPENSSL_BRANCH: 'openssl-3.5'
+  DEFAULT_OPENSSL_BRANCH: 'master'
 on:
   workflow_dispatch:
     inputs:
       openssl_branch:
         description: 'OpenSSL branch/tag to build'
         required: true
-        default: "openssl-3.5"
+        default: "master"
         type: string
   schedule:
     - cron: '0 0 * * *'
@@ -72,7 +72,7 @@ jobs:
           no-sm3 no-sm4 no-srp no-srtp  no-ssl no-ssl-trace no-ssl3-method no-static-engine \
           no-tfo no-tls1_1 no-tls1_1-method no-trace no-ts no-ubsan no-ui-console no-unit-test \
           no-uplink no-weak-ssl-ciphers no-whirlpool no-winstore no-zlib no-tests no-ecx \
-          no-rc4 no-rc5 no-rfc3779 no-zlib-dynamic no-zstd no-zstd-dynamic -DOPENSSL_NO_DEPRECATED_1_1_0"
+          no-rc4 no-rc5 no-rfc3779 no-zlib-dynamic no-zstd no-zstd-dynamic no-deprecated"
           if [ "${{ matrix.arch }}" = "arm" ]; then
             OPTS="$COMMON_OPTS no-asm"
           else
@@ -80,8 +80,7 @@ jobs:
           fi
           ./Configure ${{ matrix.openssl_target }} $OPTS \
             --prefix=${{ env.OUTPUT_DIR }} \
-            --openssldir=${{ env.OUTPUT_DIR }} \
-            --api=1.1.0
+            --openssldir=${{ env.OUTPUT_DIR }}
       
       - name: Build OpenSSL
         working-directory: openssl
