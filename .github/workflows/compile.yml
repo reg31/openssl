@@ -42,7 +42,7 @@ jobs:
         uses: actions/checkout@v5
         with:
           repository: openssl/openssl
-          ref: ${{ github.event.inputs.openssl_branch || env.DEFAULT_OPENSSL_BRANCH }}
+          ref: "${{ github.event.inputs.openssl_branch || env.DEFAULT_OPENSSL_BRANCH }}"
           fetch-depth: 0
       
       - name: Set up environment variables
