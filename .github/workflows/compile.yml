@@ -53,7 +53,6 @@ jobs:
           echo "SNAPSHOT_TAG=daily-snapshot" >> $GITHUB_ENV
       
       - name: Configure OpenSSL for Android ${{ matrix.android_abi }}
-        working-directory: openssl
         run: |
           mkdir -p ${{ env.OUTPUT_DIR }}
           export ANDROID_NDK_ROOT=$ANDROID_NDK_LATEST_HOME
@@ -82,7 +81,6 @@ jobs:
             --api=1.1.0
       
       - name: Build OpenSSL
-        working-directory: openssl
         run: |
           export ANDROID_NDK_ROOT=$ANDROID_NDK_LATEST_HOME          
           export PATH=$ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/linux-x86_64/bin:$PATH
