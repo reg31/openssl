@@ -49,6 +49,7 @@ jobs:
         run: |
           echo "ANDROID_API=35" >> $GITHUB_ENV
           echo "OUTPUT_DIR=$(pwd)/output/${{ matrix.android_abi }}" >> $GITHUB_ENV
+          echo "OPENSSL_BRANCH=${{ github.event.inputs.openssl_branch || env.DEFAULT_OPENSSL_BRANCH }}" >> $GITHUB_ENV
           echo "PACKAGE_DIR=$(pwd)/build" >> $GITHUB_ENV
           echo "SNAPSHOT_TAG=daily-snapshot" >> $GITHUB_ENV
       
@@ -84,7 +85,6 @@ jobs:
         run: |
           export ANDROID_NDK_ROOT=$ANDROID_NDK_LATEST_HOME          
           export PATH=$ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/linux-x86_64/bin:$PATH
-          echo ${{ github.event.inputs.openssl_branch || env.DEFAULT_OPENSSL_BRANCH }} >> $GITHUB_ENV
           make -j$(nproc)
           make install
           
