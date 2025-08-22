@@ -37,15 +37,13 @@ jobs:
         with:
           distribution: 'temurin'
           java-version: '24'
-          
-      - name: Clone OpenSSL
-        run: |
-          git clone https://github.com/openssl/openssl.git
-          cd openssl
-          BRANCH_TO_USE="${{ github.event.inputs.openssl_branch || env.DEFAULT_OPENSSL_BRANCH }}"
-          echo "Checking out OpenSSL branch/tag: $BRANCH_TO_USE"
-          git checkout $BRANCH_TO_USE
-          echo "OPENSSL_BRANCH=$BRANCH_TO_USE" >> $GITHUB_ENV
+
+      - name: Checkout repository
+        uses: actions/checkout@v5
+        with:
+          repository: openssl/openssl
+          ref: ${{ github.event.inputs.openssl_branch || env.DEFAULT_OPENSSL_BRANCH }}
+          fetch-depth: 0
       
       - name: Set up environment variables
         run: |
@@ -86,8 +84,9 @@ jobs:
       - name: Build OpenSSL
         working-directory: openssl
         run: |
-          export ANDROID_NDK_ROOT=$ANDROID_NDK_LATEST_HOME
+          export ANDROID_NDK_ROOT=$ANDROID_NDK_LATEST_HOME          
           export PATH=$ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/linux-x86_64/bin:$PATH
+          echo ${{ github.event.inputs.openssl_branch || env.DEFAULT_OPENSSL_BRANCH }} >> $GITHUB_ENV
           make -j$(nproc)
           make install
           
