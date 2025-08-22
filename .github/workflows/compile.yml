@@ -108,7 +108,7 @@ jobs:
           cp $LIBSSL $TEMP_DIR/lib/libssl.so
           cp $LIBCRYPTO $TEMP_DIR/lib/libcrypto.so
           mkdir -p $TEMP_DIR/include
-          cp -r openssl/include/* $TEMP_DIR/include/
+          cp -r include/* $TEMP_DIR/include/
       - name: Package artifacts
         run: 7z a "${{ env.OPENSSL_BRANCH }}-${{ matrix.android_abi }}.zip" ${{ env.PACKAGE_DIR }}/*
 
