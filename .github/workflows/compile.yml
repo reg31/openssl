@@ -75,7 +75,7 @@ jobs:
           else
             OPTS="$COMMON_OPTS"
           fi
-          ./Configure ${{ matrix.openssl_target }} $OPTS \
+          ./Configure ${{ matrix.openssl_target }} $OPTS -O2 -DNDEBUG \
             --prefix=${{ env.OUTPUT_DIR }} \
             --openssldir=${{ env.OUTPUT_DIR }} \
             --api=1.1.0
