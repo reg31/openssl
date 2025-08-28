@@ -47,6 +47,7 @@ jobs:
       
       - name: Set up environment variables
         run: |
+          echo "ANDROID_API=36" >> $GITHUB_ENV
           echo "OUTPUT_DIR=$(pwd)/output/${{ matrix.android_abi }}" >> $GITHUB_ENV
           echo "OPENSSL_BRANCH=${{ github.event.inputs.openssl_branch || env.DEFAULT_OPENSSL_BRANCH }}" >> $GITHUB_ENV
           echo "PACKAGE_DIR=$(pwd)/build" >> $GITHUB_ENV
