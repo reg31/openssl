@@ -1,13 +1,13 @@
 name: Build OpenSSL for Android
 env:
-  DEFAULT_OPENSSL_BRANCH: 'openssl-3.5'
+  OPENSSL_BRANCH: 'openssl-3.5'
 on:
   workflow_dispatch:
     inputs:
       openssl_branch:
         description: 'OpenSSL branch/tag to build'
         required: true
-        default: "openssl-3.6"
+        default: ${{ env.OPENSSL_BRANCH }}
         type: string
   schedule:
     - cron: '0 0 * * *'
@@ -42,13 +42,13 @@ jobs:
         uses: actions/checkout@v5
         with:
           repository: openssl/openssl
-          ref: "${{ github.event.inputs.openssl_branch || env.DEFAULT_OPENSSL_BRANCH }}"
+          ref: "${{ github.event.inputs.openssl_branch || env.OPENSSL_BRANCH }}"
           fetch-depth: 0
       
       - name: Set up environment variables
         run: |
           echo "OUTPUT_DIR=$(pwd)/output/${{ matrix.android_abi }}" >> $GITHUB_ENV
-          echo "OPENSSL_BRANCH=${{ github.event.inputs.openssl_branch || env.DEFAULT_OPENSSL_BRANCH }}" >> $GITHUB_ENV
+          echo "OPENSSL_BRANCH=${{ github.event.inputs.openssl_branch || env.OPENSSL_BRANCH }}" >> $GITHUB_ENV
           echo "PACKAGE_DIR=$(pwd)/build" >> $GITHUB_ENV
           echo "SNAPSHOT_TAG=daily-snapshot" >> $GITHUB_ENV
       
