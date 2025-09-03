@@ -1,6 +1,6 @@
 name: Build OpenSSL for Android
 env:
-  DEFAULT_OPENSSL_BRANCH: 'openssl-3.6'
+  DEFAULT_OPENSSL_BRANCH: 'openssl-3.5'
 on:
   workflow_dispatch:
     inputs:
