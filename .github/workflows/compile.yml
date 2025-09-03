@@ -7,7 +7,7 @@ on:
       openssl_branch:
         description: 'OpenSSL branch/tag to build'
         required: true
-        default: ${{ env.OPENSSL_BRANCH }}
+        default: 'openssl-3.5'
         type: string
   schedule:
     - cron: '0 0 * * *'
