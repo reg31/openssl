@@ -52,8 +52,8 @@ jobs:
           echo "OPENSSL_BRANCH=${{ github.event.inputs.openssl_branch || env.OPENSSL_BRANCH }}" >> $GITHUB_ENV
           echo "PACKAGE_DIR=$(pwd)/build" >> $GITHUB_ENV
           echo "SNAPSHOT_TAG=daily-snapshot" >> $GITHUB_ENV
-          echo PATH=$ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/linux-x86_64/bin:$PATH >> $GITHUB_ENV
-          echo ANDROID_NDK_ROOT=$ANDROID_NDK_LATEST_HOME >> $GITHUB_ENV
+          export PATH=$ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/linux-x86_64/bin:$PATH
+          export ANDROID_NDK_ROOT=$ANDROID_NDK_LATEST_HOME
       
       - name: Configure OpenSSL for Android ${{ matrix.android_abi }}
         run: |
