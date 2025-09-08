@@ -56,7 +56,6 @@ jobs:
       - name: Configure OpenSSL for Android ${{ matrix.android_abi }}
         run: |
           mkdir -p ${{ env.OUTPUT_DIR }}
-          export CC="clang ./config -O2 -DNDEBUG"
           export ANDROID_NDK_ROOT=$ANDROID_NDK_LATEST_HOME
           export PATH=$ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/linux-x86_64/bin:$PATH
           COMMON_OPTS="no-acvp-tests no-afalgeng no-apps no-argon2 no-aria no-asan no-autoerrinit \
@@ -79,7 +78,7 @@ jobs:
             OPTS="$COMMON_OPTS"
           fi
           
-          ./Configure ${{ matrix.openssl_target }} $OPTS \
+          ./Configure ${{ matrix.openssl_target }} $OPTS -O2 -DNDEBUG \
             --prefix=${{ env.OUTPUT_DIR }} \
             --openssldir=${{ env.OUTPUT_DIR }} \
             --api=1.1.0
