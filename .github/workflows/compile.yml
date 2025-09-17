@@ -230,7 +230,7 @@ jobs:
   release:
       needs: [build-openssl-android-branch, build-openssl-android-master]
       runs-on: ubuntu-latest
-      if: ${{ !cancelled() && build-openssl-android-branch.result == 'success'}}
+      if: ${{ !cancelled() && needs.build-openssl-android-branch.result == 'success'}}
       steps:
         - name: Download all artifacts
           uses: actions/download-artifact@v4
