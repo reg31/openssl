@@ -149,10 +149,8 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v5
         with:
-          #repository: openssl/openssl
-          #ref: master
-          repository: mbroz/openssl
-          ref: engine-code-removal
+          repository: openssl/openssl
+          ref: master
           fetch-depth: 0
       
       - name: Set up environment variables
