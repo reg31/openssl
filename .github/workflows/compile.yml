@@ -150,15 +150,10 @@ jobs:
         uses: actions/checkout@v5
         with:
           repository: openssl/openssl
-          ref: master
+          #ref: master
+          ref: feature/removessl3
+          #ref: feature/engineremoval         
           fetch-depth: 0
-
-      - name: Pull removal branches   
-        run: |
-          git fetch origin feature/engineremoval
-          git merge origin/feature/engineremoval --no-commit
-          git fetch origin feature/removessl3
-          git merge origin/feature/removessl3 --no-commit
       
       - name: Set up environment variables
         run: |
