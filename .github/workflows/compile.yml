@@ -1,6 +1,5 @@
 name: Build OpenSSL for Android
 env:
-  JAVA_VERSION: 24
   OPENSSL_BRANCH: 'openssl-3.6'
   OPENSSL_MASTER: 'openssl-4.0'
 on:
@@ -35,11 +34,10 @@ jobs:
     
     steps:
       - name: Set up JDK
-        uses: actions/setup-java@v5
+      - name: Set up JDK
+        uses: oracle-actions/setup-java@v1
         with:
-          distribution: 'temurin'
-          java-version: ${{ env.JAVA_VERSION }}
-          check-latest: true
+          website: jdk.java.net
 
       - name: Checkout repository
         uses: actions/checkout@v5
@@ -140,11 +138,9 @@ jobs:
     
     steps:
       - name: Set up JDK
-        uses: actions/setup-java@v5
+        uses: oracle-actions/setup-java@v1
         with:
-          distribution: 'temurin'
-          java-version: ${{ env.JAVA_VERSION }}
-          check-latest: true
+          website: jdk.java.net
 
       - name: Checkout repository
         uses: actions/checkout@v5
