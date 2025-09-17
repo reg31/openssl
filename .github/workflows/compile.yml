@@ -1,6 +1,6 @@
 name: Build OpenSSL for Android
 env:
-  JAVA_VERSION: 25
+  JAVA_VERSION: 24
   OPENSSL_BRANCH: 'openssl-3.6'
   OPENSSL_MASTER: 'openssl-4.0'
 on:
