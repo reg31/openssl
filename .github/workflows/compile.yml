@@ -156,9 +156,9 @@ jobs:
       - name: Pull removal branches   
         run: |
           git fetch origin feature/engineremoval
-          git git merge origin/feature/engineremoval --no-commit
+          git merge origin/feature/engineremoval --no-commit
           git fetch origin feature/removessl3
-          git git merge origin/feature/removessl3 --no-commit
+          git merge origin/feature/removessl3 --no-commit
       
       - name: Set up environment variables
         run: |
