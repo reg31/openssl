@@ -37,7 +37,7 @@ jobs:
         uses: actions/setup-java@v5
         with:
           distribution: 'temurin'
-          java-version: env.JAVA_VERSION
+          java-version: ${{ env.JAVA_VERSION }}
           check-latest: true
 
       - name: Checkout repository
@@ -142,7 +142,7 @@ jobs:
         uses: actions/setup-java@v5
         with:
           distribution: 'temurin'
-          java-version: env.JAVA_VERSION
+          java-version: ${{ env.JAVA_VERSION }}
           check-latest: true
 
       - name: Checkout repository
