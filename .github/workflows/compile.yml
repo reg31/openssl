@@ -34,7 +34,6 @@ jobs:
     
     steps:
       - name: Set up JDK
-      - name: Set up JDK
         uses: oracle-actions/setup-java@v1
         with:
           website: jdk.java.net
