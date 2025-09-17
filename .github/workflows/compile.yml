@@ -1,5 +1,6 @@
 name: Build OpenSSL for Android
 env:
+  JAVA_VERSION: 24
   OPENSSL_BRANCH: 'openssl-3.6'
 on:
   workflow_dispatch:
@@ -16,7 +17,7 @@ on:
   pull_request:
     branches: [ main ]
 jobs:
-  build-openssl-android:
+  build-openssl-android-branch:
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -36,7 +37,7 @@ jobs:
         uses: actions/setup-java@v5
         with:
           distribution: 'temurin'
-          java-version: '24'
+          java-version: env.JAVA_VERSION
           check-latest: true
 
       - name: Checkout repository
@@ -51,7 +52,6 @@ jobs:
           echo "OUTPUT_DIR=$(pwd)/output/${{ matrix.android_abi }}" >> $GITHUB_ENV
           echo "OPENSSL_BRANCH=${{ github.event.inputs.openssl_branch || env.OPENSSL_BRANCH }}" >> $GITHUB_ENV
           echo "PACKAGE_DIR=$(pwd)/build" >> $GITHUB_ENV
-          echo "SNAPSHOT_TAG=daily-snapshot" >> $GITHUB_ENV
 
       - name: Configure OpenSSL for Android ${{ matrix.android_abi }}
         run: |
@@ -122,10 +122,115 @@ jobs:
           path: ${{ env.OPENSSL_BRANCH }}-${{ matrix.android_abi }}.zip
           retention-days: 5
 
+  build-openssl-android-master:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        arch: [arm, arm64]
+        include:
+          - arch: arm
+            android_abi: armeabi-v7a
+            openssl_target: android-arm
+          - arch: arm64
+            android_abi: arm64-v8a
+            openssl_target: android-arm64
+        build_type:
+          - Release
+    
+    steps:
+      - name: Set up JDK
+        uses: actions/setup-java@v5
+        with:
+          distribution: 'temurin'
+          java-version: env.JAVA_VERSION
+          check-latest: true
+
+      - name: Checkout repository
+        uses: actions/checkout@v5
+        with:
+          repository: openssl/openssl
+          ref: master
+          fetch-depth: 0
+      
+      - name: Set up environment variables
+        run: |
+          echo "OUTPUT_DIR=$(pwd)/output/${{ matrix.android_abi }}" >> $GITHUB_ENV
+          echo "OPENSSL_BRANCH=openssl-4.0" >> $GITHUB_ENV
+          echo "PACKAGE_DIR=$(pwd)/build" >> $GITHUB_ENV
+
+      - name: Configure OpenSSL for Android ${{ matrix.android_abi }}
+        run: |
+          mkdir -p ${{ env.OUTPUT_DIR }}
+          export ANDROID_NDK_ROOT=$ANDROID_NDK_LATEST_HOME
+          export PATH=$ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/linux-x86_64/bin:$PATH
+          COMMON_OPTS="no-acvp-tests no-afalgeng no-apps no-argon2 no-aria no-asan no-autoerrinit \
+          no-bf no-blake2 no-brotli no-brotli-dynamic no-buildtest-c++ no-stdio no-unstable-qlog \
+          no-camellia no-capieng no-cast no-cmp no-cms no-comp no-crypto-mdebug no-ct no-demos \
+          no-devcryptoeng no-docs no-dtls1 no-dtls1-method no-sslkeylog no-ssl3 \
+          no-ec2m no-egd no-err no-integrity-only-ciphers no-external-tests no-threads \
+          no-filenames no-fips no-fips-securitychecks no-fuzz-afl no-fuzz-libfuzzer \
+          no-gost no-h3demo no-idea no-jitter no-seed no-hqinterop no-tls-deprecated-ec no-secure-memory \
+          no-ktls no-legacy no-md2 no-md4 no-mdc2 no-msan no-deprecated no-ocb no-padlockeng no-chacha \
+          no-poly1305 no-posix-io no-rmd160 no-scrypt no-sctp no-siphash no-siv no-sm2 no-sm2-precomp \
+          no-sm3 no-sm4 no-srp no-srtp no-ssl no-ssl-trace no-ssl3-method no-static-engine no-ecx \
+          no-tfo no-tls1_1 no-tls1_1-method no-trace no-ts no-ubsan no-ui-console no-unit-test \
+          no-uplink no-weak-ssl-ciphers no-whirlpool no-winstore no-zlib no-tests no-ecdh no-ecdsa \
+          no-rc4 no-rc5 no-rfc3779 no-zlib-dynamic no-zstd no-zstd-dynamic -DOPENSSL_NO_DEPRECATED_1_1_0"
+          
+          if [ "${{ matrix.arch }}" = "arm" ]; then
+            OPTS="$COMMON_OPTS no-asm"
+          else
+            OPTS="$COMMON_OPTS"
+          fi
+          
+          ./Configure ${{ matrix.openssl_target }} $OPTS -O2 -DNDEBUG \
+            --prefix=${{ env.OUTPUT_DIR }} \
+            --openssldir=${{ env.OUTPUT_DIR }} \
+            --api=1.1.0
+      
+      - name: Build OpenSSL
+        run: |
+          export ANDROID_NDK_ROOT=$ANDROID_NDK_LATEST_HOME
+          export PATH=$ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/linux-x86_64/bin:$PATH 
+          make -j$(nproc)
+          make install
+          
+      - name: Strip .so files
+        run: |
+          TEMP_DIR=${{ env.PACKAGE_DIR }}
+          mkdir -p $TEMP_DIR/lib
+          export ANDROID_NDK_BIN=$ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/linux-x86_64/bin
+          LIBSSL=$(find ${{ env.OUTPUT_DIR }} -name "libssl*.so" -type f)
+          LIBCRYPTO=$(find ${{ env.OUTPUT_DIR }} -name "libcrypto*.so" -type f)
+          LIBSSLA=$(find ${{ env.OUTPUT_DIR }} -name "libssl*.a" -type f)
+          LIBCRYPTOA=$(find ${{ env.OUTPUT_DIR }} -name "libcrypto*.a" -type f)
+          $ANDROID_NDK_BIN/llvm-strip --strip-all $LIBSSL
+          $ANDROID_NDK_BIN/llvm-strip --strip-all $LIBCRYPTO
+          $ANDROID_NDK_BIN/llvm-strip --strip-all $LIBSSLA
+          $ANDROID_NDK_BIN/llvm-strip --strip-all $LIBCRYPTOA
+          cp $LIBSSL $TEMP_DIR/lib/libssl_3.so
+          cp $LIBCRYPTO $TEMP_DIR/lib/libcrypto_3.so
+          cp $LIBSSLA $TEMP_DIR/lib/libssl.a
+          cp $LIBCRYPTOA $TEMP_DIR/lib/libcrypto.a
+          cp $LIBSSL $TEMP_DIR/lib/libssl.so
+          cp $LIBCRYPTO $TEMP_DIR/lib/libcrypto.so
+          mkdir -p $TEMP_DIR/include
+          cp -r include/* $TEMP_DIR/include/
+          
+      - name: Package artifacts
+        run: 7z a "${{ env.OPENSSL_BRANCH }}-${{ matrix.android_abi }}.zip" ${{ env.PACKAGE_DIR }}/*
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: openssl-android-${{ matrix.android_abi }}
+          path: ${{ env.OPENSSL_BRANCH }}-${{ matrix.android_abi }}.zip
+          retention-days: 5
+
   release:
-      needs: [build-openssl-android]
+      needs: [build-openssl-android-branch, build-openssl-android-master]
       runs-on: ubuntu-latest
-      if: ${{ github.ref == 'refs/heads/main' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' }}
+      if: ${{ !cancelled() && build-openssl-android-branch.result == 'success'}}
       steps:
         - name: Download all artifacts
           uses: actions/download-artifact@v4
@@ -134,10 +239,10 @@ jobs:
           
         - name: Publish Daily Snapshot Release
           uses: softprops/action-gh-release@v2
-          if: ${{ github.ref == 'refs/heads/main' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' }}
           with:
             tag_name: ${{ github.run_id }}
-            name: "OpenSSL for Android - Daily Build"
+            name: "OpenSSL for Android - Daily Build"            
+            fail_on_unmatched_files: false
             body: |
               Automated daily build of OpenSSL ${{ env.OPENSSL_BRANCH }} for Android
   
