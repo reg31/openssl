@@ -155,8 +155,8 @@ jobs:
 
       - name: Pull removal branches   
         run: |
-          git pull origin feature/engineremoval --rebase --no-commit
-          git pull origin feature/removessl3 --rebase --no-commit
+          git pull origin feature/engineremoval --no-rebase --no-commit
+          git pull origin feature/removessl3 --no-rebase --no-commit
       
       - name: Set up environment variables
         run: |
