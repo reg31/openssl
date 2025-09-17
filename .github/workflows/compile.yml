@@ -155,7 +155,7 @@ jobs:
       - name: Set up environment variables
         run: |
           echo "OUTPUT_DIR=$(pwd)/output/${{ matrix.android_abi }}" >> $GITHUB_ENV
-          echo "OPENSSL_BRANCH=openssl-4.0" >> $GITHUB_ENV
+          echo "OPENSSL_MASTER=openssl-4.0" >> $GITHUB_ENV
           echo "PACKAGE_DIR=$(pwd)/build" >> $GITHUB_ENV
 
       - name: Configure OpenSSL for Android ${{ matrix.android_abi }}
@@ -218,13 +218,13 @@ jobs:
           cp -r include/* $TEMP_DIR/include/
           
       - name: Package artifacts
-        run: 7z a "${{ env.OPENSSL_BRANCH }}-${{ matrix.android_abi }}.zip" ${{ env.PACKAGE_DIR }}/*
+        run: 7z a "${{ env.OPENSSL_MASTER }}-${{ matrix.android_abi }}.zip" ${{ env.PACKAGE_DIR }}/*
 
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
         with:
           name: openssl-android-${{ matrix.android_abi }}
-          path: ${{ env.OPENSSL_BRANCH }}-${{ matrix.android_abi }}.zip
+          path: ${{ env.OPENSSL_MASTER }}-${{ matrix.android_abi }}.zip
           retention-days: 5
 
   release:
