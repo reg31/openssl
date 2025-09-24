@@ -151,8 +151,7 @@ jobs:
         uses: actions/checkout@v5
         with:
           repository: openssl/openssl
-          #ref: master 
-          ref: feature/engineremoval
+          ref: master 
           fetch-depth: 0
       
       - name: Set up environment variables
