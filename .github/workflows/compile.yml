@@ -2,7 +2,8 @@ name: Build OpenSSL for Android
 env:
   JAVA_VERSION: 25
   OPENSSL_BRANCH: 'openssl-3.6'
-  OPENSSL_MASTER: 'openssl-4.0'
+  #OPENSSL_MASTER: 'openssl-4.0'
+  OPENSSL_MASTER: 'feature/engineremoval'
 on:
   workflow_dispatch:
     inputs:
