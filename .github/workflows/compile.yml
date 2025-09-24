@@ -79,7 +79,7 @@ jobs:
             OPTS="$COMMON_OPTS"
           fi
           
-          ./Configure ${{ matrix.openssl_target }} $OPTS -O2 -DNDEBUG -DLIBCXXABI_NON_DEMANGLING_TERMINATE \
+          ./Configure ${{ matrix.openssl_target }} $OPTS -O2 -DNDEBUG -DLIBCXXABI_NON_DEMANGLING_TERMINATE=ON \
             -Wl,--pack-dyn-relocs=android+relr,--use-android-relr-tags,--gc-sections \
             --prefix=${{ env.OUTPUT_DIR }} \
             --openssldir=${{ env.OUTPUT_DIR }} \
