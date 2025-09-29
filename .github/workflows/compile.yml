@@ -167,7 +167,7 @@ jobs:
           COMMON_OPTS="no-acvp-tests no-afalgeng no-apps no-argon2 no-aria no-asan no-autoerrinit \
           no-bf no-blake2 no-brotli no-brotli-dynamic no-buildtest-c++ no-stdio no-unstable-qlog \
           no-camellia no-capieng no-cast no-cmp no-cms no-comp no-crypto-mdebug no-ct no-demos \
-          no-ec2m no-egd no-err no-integrity-only-ciphers no-external-tests no-threads no-ocsp no-afalgeng \
+          no-ec2m no-egd no-err no-integrity-only-ciphers no-external-tests no-threads no-ocsp \
           no-filenames no-fips no-fips-securitychecks no-fuzz-afl no-fuzz-libfuzzer no-sslkeylog \
           no-gost no-h3demo no-idea no-jitter no-seed no-hqinterop no-tls-deprecated-ec no-secure-memory \
           no-ktls no-legacy no-md2 no-md4 no-mdc2 no-msan no-deprecated no-ocb no-padlockeng no-chacha \
