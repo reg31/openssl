@@ -71,6 +71,7 @@ jobs:
           no-sm3 no-sm4 no-srp no-srtp no-ssl no-ssl-trace no-ssl3-method no-static-engine no-ecx \
           no-tfo no-tls1_1 no-tls1_1-method no-trace no-ts no-ubsan no-ui-console no-unit-test no-dtls \
           no-uplink no-weak-ssl-ciphers no-whirlpool no-winstore no-zlib no-tests no-ecdh no-ecdsa \
+          no-atexit no-allocfail-tests no-fips-jitter no-ec_nistp_64_gcc_128 no-lms \
           no-rc4 no-rc5 no-rfc3779 no-zlib-dynamic no-zstd no-zstd-dynamic -DOPENSSL_NO_DEPRECATED_1_1_0"
           
           if [ "${{ matrix.arch }}" = "arm" ]; then
@@ -176,6 +177,7 @@ jobs:
           no-sm3 no-sm4 no-srp no-srtp no-ssl-trace no-ecx no-devcryptoeng no-docs no-dtls1 no-dtls1-method \
           no-tfo no-tls1_1 no-tls1_1-method no-trace no-ts no-ubsan no-ui-console no-unit-test no-dtls \
           no-uplink no-weak-ssl-ciphers no-whirlpool no-winstore no-zlib no-tests no-ecdh no-ecdsa \
+          no-atexit no-allocfail-tests no-fips-jitter no-ec_nistp_64_gcc_128 no-lms \
           no-rc4 no-rc5 no-rfc3779 no-zlib-dynamic no-zstd no-zstd-dynamic -DOPENSSL_NO_DEPRECATED_1_1_0"
           
           if [ "${{ matrix.arch }}" = "arm" ]; then
