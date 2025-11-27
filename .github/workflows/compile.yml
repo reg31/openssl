@@ -42,7 +42,7 @@ jobs:
           check-latest: true
 
       - name: Checkout repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           repository: openssl/openssl
           ref: "${{ github.event.inputs.openssl_branch || env.OPENSSL_BRANCH }}"
@@ -148,7 +148,7 @@ jobs:
           check-latest: true
 
       - name: Checkout repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           repository: openssl/openssl
           ref: master
