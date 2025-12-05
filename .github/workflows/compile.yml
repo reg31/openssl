@@ -185,7 +185,7 @@ jobs:
           fi
           
           ./Configure ${{ matrix.openssl_target }} $OPTS -O2 -DNDEBUG \
-            -Wl,--pack-dyn-relocs=android+relr,--use-android-relr-tags,--gc-sections \
+            -Wl,--pack-dyn-relocs=android+relr,--use-android-relr-tags,--icf=safe \
             --prefix=${{ env.OUTPUT_DIR }} \
             --openssldir=${{ env.OUTPUT_DIR }} \
             --api=1.1.0
