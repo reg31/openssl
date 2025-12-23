@@ -118,7 +118,7 @@ jobs:
         run: 7z a "${{ env.OPENSSL_BRANCH }}-${{ matrix.android_abi }}.zip" ${{ env.PACKAGE_DIR }}/*
 
       - name: Upload build artifact
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: ${{ env.OPENSSL_BRANCH }}-${{ matrix.android_abi }}
           path: ${{ env.OPENSSL_BRANCH }}-${{ matrix.android_abi }}.zip
@@ -223,7 +223,7 @@ jobs:
         run: 7z a "${{ env.OPENSSL_MASTER }}-${{ matrix.android_abi }}.zip" ${{ env.PACKAGE_DIR }}/*
 
       - name: Upload build artifact
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: ${{ env.OPENSSL_MASTER }}-${{ matrix.android_abi }}
           path: ${{ env.OPENSSL_MASTER }}-${{ matrix.android_abi }}.zip
@@ -235,7 +235,7 @@ jobs:
       if: ${{ !cancelled() && needs.build-openssl-android-branch.result == 'success'}}
       steps:
         - name: Download all artifacts
-          uses: actions/download-artifact@v6
+          uses: actions/download-artifact@v7
           with:
             path: openssl-builds
           
