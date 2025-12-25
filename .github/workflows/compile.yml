@@ -3,7 +3,7 @@ env:
   JAVA_VERSION: 25
   OPENSSL_BRANCH: 'openssl-3.6'
   OPENSSL_MASTER: 'openssl-4.0'
-  COMMON_OPTS: no-acvp-tests no-afalgeng no-apps no-argon2 no-aria no-asan no-autoerrinit no-dgram
+  COMMON_OPTS: no-acvp-tests no-afalgeng no-apps no-argon2 no-aria no-asan no-autoerrinit
           no-bf no-blake2 no-brotli no-brotli-dynamic no-buildtest-c++ no-stdio no-unstable-qlog
           no-camellia no-capieng no-cast no-cmp no-cms no-crypto-mdebug no-demos no-ec2m no-http
           no-devcryptoeng no-docs no-dtls1 no-dtls1-method no-sslkeylog no-ssl3 no-ocsp
