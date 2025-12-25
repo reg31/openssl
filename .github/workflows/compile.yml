@@ -14,7 +14,7 @@ env:
           no-poly1305 no-posix-io no-rmd160 no-scrypt no-sctp no-siphash no-siv no-sm2 no-sm2-precomp
           no-sm3 no-sm4 no-srp no-srtp no-ssl no-ssl-trace no-ssl3-method no-static-engine
           no-tls1_1 no-tls1_1-method no-trace no-ts no-ubsan no-ui-console no-unit-test no-dtls no-psk
-          no-uplink no-weak-ssl-ciphers no-whirlpool no-winstore no-zlib no-tests enable-ec_nistp_64_gcc_128
+          no-uplink no-weak-ssl-ciphers no-whirlpool no-winstore no-zlib no-tests
           no-rc4 no-rc5 no-rfc3779 no-zlib-dynamic no-zstd no-zstd-dynamic -DOPENSSL_NO_DEPRECATED_1_1_0
 on:
   workflow_dispatch:
