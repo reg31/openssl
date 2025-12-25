@@ -5,9 +5,9 @@ env:
   OPENSSL_MASTER: 'openssl-4.0'
   COMMON_OPTS: no-acvp-tests no-afalgeng no-apps no-argon2 no-aria no-asan no-autoerrinit no-dgram
           no-bf no-blake2 no-brotli no-brotli-dynamic no-buildtest-c++ no-stdio no-unstable-qlog
-          no-camellia no-capieng no-cast no-cmp no-cms no-crypto-mdebug no-demos no-http enable-ec_nistp_64_gcc_128
+          no-camellia no-capieng no-cast no-cmp no-cms no-crypto-mdebug no-demos no-http no-ec2m
           no-devcryptoeng no-docs no-dtls1 no-dtls1-method no-sslkeylog no-ssl3 no-ocsp no-multiblock
-          no-egd no-engine no-err no-integrity-only-ciphers no-external-tests no-quic no-autoload-config
+          no-egd no-engine no-err no-integrity-only-ciphers no-external-tests no-quic
           no-filenames no-fips no-fips-securitychecks no-fuzz-afl no-fuzz-libfuzzer no-dynamic-engine
           no-gost no-h3demo no-idea no-jitter no-seed no-hqinterop no-tls-deprecated-ec no-secure-memory
           no-legacy no-md2 no-md4 no-mdc2 no-msan no-deprecated no-ocb no-padlockeng no-chacha no-atexit
