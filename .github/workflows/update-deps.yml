@@ -1,0 +1,34 @@
+name: Dependabot merge requests
+on: 
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  dependabot:
+    runs-on: ubuntu-latest
+    if: |
+      (github.event_name == 'pull_request' && github.event.pull_request.user.login == 'dependabot[bot]' && github.repository == 'owner/my_repo') ||
+      github.event_name == 'workflow_dispatch'
+    steps:
+      - name: Approve and merge single PR
+        if: github.event_name == 'pull_request'
+		with:
+          token: ${{ secrets.WORKFLOW_TOKEN }}
+        run: |
+          gh pr review --approve "${{ github.event.pull_request.number }}"
+          gh pr merge --auto --squash "${{ github.event.pull_request.number }}"
+      
+      - name: Approve and merge all pending Dependabot PRs
+        if: github.event_name == 'workflow_dispatch'
+		with:
+          token: ${{ secrets.WORKFLOW_TOKEN }}
+        run: |
+          gh pr list --author app/dependabot --json number --jq '.[].number' | while read pr_number; do
+            echo "Processing PR #$pr_number"
+            gh pr review --approve "$pr_number"
+            gh pr merge --auto --squash "$pr_number"
+          done
