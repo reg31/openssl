@@ -1,21 +1,21 @@
 name: Build OpenSSL for Android
 env:
   JAVA_VERSION: 25
+  SCCACHE_GHA_ENABLED: "true"
   OPENSSL_BRANCH: 'openssl-3.6'
   OPENSSL_MASTER: 'openssl-4.0'
-  COMMON_OPTS: no-acvp-tests no-afalgeng no-apps no-argon2 no-aria no-asan no-autoerrinit
-          no-bf no-blake2 no-brotli no-brotli-dynamic no-buildtest-c++ no-stdio no-unstable-qlog
-          no-camellia no-capieng no-cast no-cmp no-cms no-crypto-mdebug no-demos no-ec2m
-          no-devcryptoeng no-docs no-dtls1 no-dtls1-method no-sslkeylog no-ssl3 no-ocsp
-          no-egd no-engine no-err no-integrity-only-ciphers no-external-tests no-quic no-autoload-config
-          no-filenames no-fips no-fips-securitychecks no-fuzz-afl no-fuzz-libfuzzer no-dynamic-engine
-          no-gost no-h3demo no-idea no-jitter no-seed no-hqinterop no-tls-deprecated-ec no-secure-memory
-          no-legacy no-md2 no-md4 no-mdc2 no-msan no-deprecated no-ocb no-padlockeng no-chacha no-atexit
-          no-poly1305 no-posix-io no-rmd160 no-scrypt no-sctp no-siphash no-siv no-sm2 no-sm2-precomp
-          no-sm3 no-sm4 no-srp no-srtp no-ssl no-ssl-trace no-ssl3-method no-static-engine no-ecx
-          no-tls1_1 no-tls1_1-method no-trace no-ts no-ubsan no-ui-console no-unit-test no-dtls
-          no-uplink no-weak-ssl-ciphers no-whirlpool no-winstore no-zlib no-tests no-ecdh no-ecdsa
-          no-rc4 no-rc5 no-rfc3779 no-zlib-dynamic no-zstd no-zstd-dynamic -DOPENSSL_NO_DEPRECATED_1_1_0
+  COMMON_OPTS: no-acvp-tests no-afalgeng no-argon2 no-aria no-asan no-autoerrinit \
+    no-bf no-brotli no-brotli-dynamic no-buildtest-c++ no-unstable-qlog no-egd no-err \
+    no-camellia no-capieng no-cast no-cmp no-cms no-comp no-crypto-mdebug no-ct no-demos \
+    no-devcryptoeng no-docs no-dtls1 no-dtls1-method no-sslkeylog no-apps o-ec2m no-external-tests \
+    no-filenames no-fips no-fips-securitychecks no-fuzz-afl no-fuzz-libfuzzer no-dynamic-engine \
+    no-gost no-h3demo no-idea no-jitter no-seed no-hqinterop no-tls-deprecated-ec \
+    no-legacy no-md2 no-md4 no-mdc2 no-msan no-deprecated no-ocb no-padlockeng \
+    no-posix-io no-rmd160 no-scrypt no-sctp no-siphash no-sm2 no-sm2-precomp \
+    no-sm3 no-sm4 no-srp no-srtp no-ssl no-ssl-trace no-ssl3-method no-static-engine \
+    no-ssl3 no-tls1_1 no-tls1_1-method no-trace no-ts no-ubsan no-ui-console no-unit-test \
+    no-uplink no-weak-ssl-ciphers no-whirlpool no-winstore no-zlib no-tests \
+    no-rc4 no-rc5 no-rfc3779 no-zlib-dynamic no-zstd no-zstd-dynamic
 on:
   workflow_dispatch:
     inputs:
@@ -47,6 +47,9 @@ jobs:
           - Release
     
     steps:
+      - name: Run sccache-cache
+        uses: mozilla-actions/sccache-action@v0.0.9
+        
       - name: Set up JDK
         uses: actions/setup-java@v5
         with:
@@ -72,19 +75,6 @@ jobs:
           mkdir -p ${{ env.OUTPUT_DIR }}
           export ANDROID_NDK_ROOT=$ANDROID_NDK_LATEST_HOME
           export PATH=$ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/linux-x86_64/bin:$PATH
-          COMMON_OPTS="no-acvp-tests no-afalgeng no-apps no-argon2 no-aria no-asan no-autoerrinit \
-          no-bf no-blake2 no-brotli no-brotli-dynamic no-buildtest-c++ no-stdio no-unstable-qlog \
-          no-camellia no-capieng no-cast no-cmp no-cms no-comp no-crypto-mdebug no-ct no-demos \
-          no-devcryptoeng no-docs no-dtls1 no-dtls1-method no-sslkeylog no-ssl3 no-ocsp \
-          no-ec2m no-egd no-engine no-err no-integrity-only-ciphers no-external-tests no-threads \
-          no-filenames no-fips no-fips-securitychecks no-fuzz-afl no-fuzz-libfuzzer no-dynamic-engine \
-          no-gost no-h3demo no-idea no-jitter no-seed no-hqinterop no-tls-deprecated-ec no-secure-memory \
-          no-ktls no-legacy no-md2 no-md4 no-mdc2 no-msan no-deprecated no-ocb no-padlockeng no-chacha \
-          no-poly1305 no-posix-io no-rmd160 no-scrypt no-sctp no-siphash no-siv no-sm2 no-sm2-precomp \
-          no-sm3 no-sm4 no-srp no-srtp no-ssl no-ssl-trace no-ssl3-method no-static-engine no-ecx \
-          no-tfo no-tls1_1 no-tls1_1-method no-trace no-ts no-ubsan no-ui-console no-unit-test no-dtls \
-          no-uplink no-weak-ssl-ciphers no-whirlpool no-winstore no-zlib no-tests no-ecdh no-ecdsa \
-          no-rc4 no-rc5 no-rfc3779 no-zlib-dynamic no-zstd no-zstd-dynamic -DOPENSSL_NO_DEPRECATED_1_1_0"
           
           if [ "${{ matrix.arch }}" = "arm" ]; then
             OPTS="${{ env.COMMON_OPTS }} no-asm"
@@ -92,7 +82,7 @@ jobs:
             OPTS="${{ env.COMMON_OPTS }}"
           fi
           
-          ./Configure ${{ matrix.openssl_target }} $OPTS -O2 -DNDEBUG \
+          ./Configure ${{ matrix.openssl_target }} $OPTS -O2 -DNDEBUG CC="sccache clang" CXX="sccache clang" \
             -Wl,--pack-dyn-relocs=android+relr,--use-android-relr-tags,--gc-sections \
             --prefix=${{ env.OUTPUT_DIR }} \
             --openssldir=${{ env.OUTPUT_DIR }} \
@@ -153,6 +143,9 @@ jobs:
           - Release
     
     steps:
+      - name: Run sccache-cache
+        uses: mozilla-actions/sccache-action@v0.0.9
+        
       - name: Set up JDK
         uses: actions/setup-java@v5
         with:
@@ -185,7 +178,7 @@ jobs:
             OPTS="${{ env.COMMON_OPTS }}"
           fi
           
-          ./Configure ${{ matrix.openssl_target }} $OPTS -O2 -DNDEBUG \
+          ./Configure ${{ matrix.openssl_target }} $OPTS -O2 -DNDEBUG CC="sccache clang" CXX="sccache clang" \
             -Wl,--pack-dyn-relocs=android+relr,--use-android-relr-tags,--gc-sections \
             --prefix=${{ env.OUTPUT_DIR }} \
             --openssldir=${{ env.OUTPUT_DIR }} \
