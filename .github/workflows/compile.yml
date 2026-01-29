@@ -1,21 +1,12 @@
 name: Build OpenSSL for Android
+
 env:
   JAVA_VERSION: 25
   SCCACHE_GHA_ENABLED: "true"
   OPENSSL_BRANCH: 'openssl-3.6'
   OPENSSL_MASTER: 'openssl-4.0'
-  COMMON_OPTS: no-acvp-tests no-afalgeng no-argon2 no-aria no-asan no-autoerrinit
-    no-bf no-brotli no-brotli-dynamic no-buildtest-c++ no-unstable-qlog no-egd no-err
-    no-camellia no-capieng no-cast no-cmp no-cms no-comp no-crypto-mdebug no-ct no-demos
-    no-devcryptoeng no-docs no-dtls1 no-dtls1-method no-sslkeylog no-apps no-ec2m no-external-tests
-    no-filenames no-fips no-fips-securitychecks no-fuzz-afl no-fuzz-libfuzzer no-dynamic-engine
-    no-gost no-h3demo no-idea no-jitter no-seed no-hqinterop no-tls-deprecated-ec
-    no-legacy no-md2 no-md4 no-mdc2 no-msan no-deprecated no-ocb no-padlockeng
-    no-posix-io no-rmd160 no-scrypt no-sctp no-siphash no-sm2 no-sm2-precomp
-    no-sm3 no-sm4 no-srp no-srtp no-ssl no-ssl-trace no-ssl3-method no-static-engine
-    no-ssl3 no-tls1_1 no-tls1_1-method no-trace no-ts no-ubsan no-ui-console no-unit-test
-    no-uplink no-weak-ssl-ciphers no-whirlpool no-winstore no-zlib no-tests
-    no-rc4 no-rc5 no-rfc3779 no-zlib-dynamic no-zstd no-zstd-dynamic
+  COMMON_OPTS: no-acvp-tests no-afalgeng no-argon2 no-aria no-asan no-autoerrinit no-bf no-brotli no-brotli-dynamic no-buildtest-c++ no-unstable-qlog no-egd no-err no-camellia no-capieng no-cast no-cmp no-cms no-comp no-crypto-mdebug no-ct no-demos no-devcryptoeng no-docs no-dtls1 no-dtls1-method no-sslkeylog no-apps no-ec2m no-external-tests no-filenames no-fips no-fips-securitychecks no-fuzz-afl no-fuzz-libfuzzer no-dynamic-engine no-gost no-h3demo no-idea no-jitter no-seed no-hqinterop no-tls-deprecated-ec no-legacy no-md2 no-md4 no-mdc2 no-msan no-deprecated no-ocb no-padlockeng no-posix-io no-rmd160 no-scrypt no-sctp no-siphash no-sm2 no-sm2-precomp no-sm3 no-sm4 no-srp no-srtp no-ssl no-ssl-trace no-ssl3-method no-static-engine no-ssl3 no-tls1_1 no-tls1_1-method no-trace no-ts no-ubsan no-ui-console no-unit-test no-uplink no-weak-ssl-ciphers no-whirlpool no-winstore no-zlib no-tests no-rc4 no-rc5 no-rfc3779 no-zlib-dynamic no-zstd no-zstd-dynamic
+
 on:
   workflow_dispatch:
     inputs:
@@ -30,21 +21,10 @@ on:
     branches: [ main ]
   pull_request:
     branches: [ main ]
+
 jobs:
-  build-openssl-android-branch:
+  build-openssl-android-arm-branch:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        arch: [arm, arm64]
-        include:
-          - arch: arm
-            android_abi: armeabi-v7a
-            openssl_target: android-arm
-          - arch: arm64
-            android_abi: arm64-v8a
-            openssl_target: android-arm64
-        build_type:
-          - Release
     
     steps:
       - name: Run sccache-cache
@@ -66,34 +46,25 @@ jobs:
       
       - name: Set up environment variables
         run: |
-          echo "OUTPUT_DIR=$(pwd)/output/${{ matrix.android_abi }}" >> $GITHUB_ENV
+          echo "OUTPUT_DIR=$(pwd)/output/armeabi-v7a" >> $GITHUB_ENV
           echo "OPENSSL_BRANCH=${{ github.event.inputs.openssl_branch || env.OPENSSL_BRANCH }}" >> $GITHUB_ENV
           echo "PACKAGE_DIR=$(pwd)/build" >> $GITHUB_ENV
 
-      - name: Configure OpenSSL for Android ${{ matrix.android_abi }}
+      - name: Configure OpenSSL for Android armeabi-v7a
         run: |
           mkdir -p ${{ env.OUTPUT_DIR }}
           export ANDROID_NDK_ROOT=$ANDROID_NDK_LATEST_HOME
           export PATH=$ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/linux-x86_64/bin:$PATH
-          
-          if [ "${{ matrix.arch }}" = "arm" ]; then
-            OPTS="${{ env.COMMON_OPTS }} no-asm"
-          else
-            OPTS="${{ env.COMMON_OPTS }}"
-          fi
-          
-          ./Configure ${{ matrix.openssl_target }} $OPTS -O2 -DNDEBUG \
+          ./Configure android-arm ${{ env.COMMON_OPTS }} no-asm -O2 -DNDEBUG \
             -Wl,--pack-dyn-relocs=android+relr,--use-android-relr-tags,--gc-sections \
             --prefix=${{ env.OUTPUT_DIR }} \
-            --openssldir=${{ env.OUTPUT_DIR }} \
-            --api=1.1.0
+            --openssldir=${{ env.OUTPUT_DIR }}
       
       - name: Build OpenSSL
         run: |
           export ANDROID_NDK_ROOT=$ANDROID_NDK_LATEST_HOME
           export PATH=$ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/linux-x86_64/bin:$PATH
-          export SCCACHE_C_CUSTOM_CACHE_BUSTER=${{ env.OPENSSL_BRANCH }}-${{ matrix.android_abi }}
-          export SCCACHE_RECACHE="true"
+          export SCCACHE_C_CUSTOM_CACHE_BUSTER=${{ env.OPENSSL_BRANCH }}-armeabi-v7a
           make -j$(nproc) CC="sccache clang" CXX="sccache clang"
           make install
           
@@ -101,6 +72,7 @@ jobs:
         run: |
           TEMP_DIR=${{ env.PACKAGE_DIR }}
           mkdir -p $TEMP_DIR/lib
+          export ANDROID_NDK_ROOT=$ANDROID_NDK_LATEST_HOME
           export ANDROID_NDK_BIN=$ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/linux-x86_64/bin
           LIBSSL=$(find ${{ env.OUTPUT_DIR }} -name "libssl*.so" -type f)
           LIBCRYPTO=$(find ${{ env.OUTPUT_DIR }} -name "libcrypto*.so" -type f)
@@ -117,32 +89,98 @@ jobs:
           cp $LIBSSL $TEMP_DIR/lib/libssl.so
           cp $LIBCRYPTO $TEMP_DIR/lib/libcrypto.so
           mkdir -p $TEMP_DIR/include
-          cp -r include/* $TEMP_DIR/include/
+          cp -r ${{ env.OUTPUT_DIR }}/include/* $TEMP_DIR/include/
           
       - name: Package artifacts
-        run: 7z a "${{ env.OPENSSL_BRANCH }}-${{ matrix.android_abi }}.zip" ${{ env.PACKAGE_DIR }}/*
+        run: 7z a "${{ env.OPENSSL_BRANCH }}-armeabi-v7a.zip" ${{ env.PACKAGE_DIR }}/*
 
       - name: Upload build artifact
         uses: actions/upload-artifact@v6
         with:
-          name: ${{ env.OPENSSL_BRANCH }}-${{ matrix.android_abi }}
-          path: ${{ env.OPENSSL_BRANCH }}-${{ matrix.android_abi }}.zip
+          name: ${{ env.OPENSSL_BRANCH }}-armeabi-v7a
+          path: ${{ env.OPENSSL_BRANCH }}-armeabi-v7a.zip
           retention-days: 5
 
-  build-openssl-android-master:
+  build-openssl-android-arm64-branch:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        arch: [arm, arm64]
-        include:
-          - arch: arm
-            android_abi: armeabi-v7a
-            openssl_target: android-arm
-          - arch: arm64
-            android_abi: arm64-v8a
-            openssl_target: android-arm64
-        build_type:
-          - Release
+    
+    steps:
+      - name: Run sccache-cache
+        uses: mozilla-actions/sccache-action@v0.0.9
+        
+      - name: Set up JDK
+        uses: actions/setup-java@v5
+        with:
+          distribution: 'temurin'
+          java-version: ${{ env.JAVA_VERSION }}
+          check-latest: true
+
+      - name: Checkout repository
+        uses: actions/checkout@v6
+        with:
+          repository: openssl/openssl
+          ref: "${{ github.event.inputs.openssl_branch || env.OPENSSL_BRANCH }}"
+          fetch-depth: 0
+      
+      - name: Set up environment variables
+        run: |
+          echo "OUTPUT_DIR=$(pwd)/output/arm64-v8a" >> $GITHUB_ENV
+          echo "OPENSSL_BRANCH=${{ github.event.inputs.openssl_branch || env.OPENSSL_BRANCH }}" >> $GITHUB_ENV
+          echo "PACKAGE_DIR=$(pwd)/build" >> $GITHUB_ENV
+
+      - name: Configure OpenSSL for Android arm64-v8a
+        run: |
+          mkdir -p ${{ env.OUTPUT_DIR }}
+          export ANDROID_NDK_ROOT=$ANDROID_NDK_LATEST_HOME
+          export PATH=$ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/linux-x86_64/bin:$PATH
+          ./Configure android-arm64 ${{ env.COMMON_OPTS }} -O2 -DNDEBUG \
+            -Wl,--pack-dyn-relocs=android+relr,--use-android-relr-tags,--gc-sections \
+            --prefix=${{ env.OUTPUT_DIR }} \
+            --openssldir=${{ env.OUTPUT_DIR }}
+      
+      - name: Build OpenSSL
+        run: |
+          export ANDROID_NDK_ROOT=$ANDROID_NDK_LATEST_HOME
+          export PATH=$ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/linux-x86_64/bin:$PATH
+          export SCCACHE_C_CUSTOM_CACHE_BUSTER=${{ env.OPENSSL_BRANCH }}-arm64-v8a
+          make -j$(nproc) CC="sccache clang" CXX="sccache clang"
+          make install
+          
+      - name: Strip .so files
+        run: |
+          TEMP_DIR=${{ env.PACKAGE_DIR }}
+          mkdir -p $TEMP_DIR/lib
+          export ANDROID_NDK_ROOT=$ANDROID_NDK_LATEST_HOME
+          export ANDROID_NDK_BIN=$ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/linux-x86_64/bin
+          LIBSSL=$(find ${{ env.OUTPUT_DIR }} -name "libssl*.so" -type f)
+          LIBCRYPTO=$(find ${{ env.OUTPUT_DIR }} -name "libcrypto*.so" -type f)
+          LIBSSLA=$(find ${{ env.OUTPUT_DIR }} -name "libssl*.a" -type f)
+          LIBCRYPTOA=$(find ${{ env.OUTPUT_DIR }} -name "libcrypto*.a" -type f)
+          $ANDROID_NDK_BIN/llvm-strip --strip-all $LIBSSL
+          $ANDROID_NDK_BIN/llvm-strip --strip-all $LIBCRYPTO
+          $ANDROID_NDK_BIN/llvm-strip --strip-all $LIBSSLA
+          $ANDROID_NDK_BIN/llvm-strip --strip-all $LIBCRYPTOA
+          cp $LIBSSL $TEMP_DIR/lib/libssl_3.so
+          cp $LIBCRYPTO $TEMP_DIR/lib/libcrypto_3.so
+          cp $LIBSSLA $TEMP_DIR/lib/libssl.a
+          cp $LIBCRYPTOA $TEMP_DIR/lib/libcrypto.a
+          cp $LIBSSL $TEMP_DIR/lib/libssl.so
+          cp $LIBCRYPTO $TEMP_DIR/lib/libcrypto.so
+          mkdir -p $TEMP_DIR/include
+          cp -r ${{ env.OUTPUT_DIR }}/include/* $TEMP_DIR/include/
+          
+      - name: Package artifacts
+        run: 7z a "${{ env.OPENSSL_BRANCH }}-arm64-v8a.zip" ${{ env.PACKAGE_DIR }}/*
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v6
+        with:
+          name: ${{ env.OPENSSL_BRANCH }}-arm64-v8a
+          path: ${{ env.OPENSSL_BRANCH }}-arm64-v8a.zip
+          retention-days: 5
+
+  build-openssl-android-arm-master:
+    runs-on: ubuntu-latest
     
     steps:
       - name: Run sccache-cache
@@ -160,38 +198,28 @@ jobs:
         with:
           repository: openssl/openssl
           ref: master
-          #ref: feature/engineremoval
           fetch-depth: 0
       
       - name: Set up environment variables
         run: |
-          echo "OUTPUT_DIR=$(pwd)/output/${{ matrix.android_abi }}" >> $GITHUB_ENV
+          echo "OUTPUT_DIR=$(pwd)/output/armeabi-v7a" >> $GITHUB_ENV
           echo "PACKAGE_DIR=$(pwd)/build" >> $GITHUB_ENV
 
-      - name: Configure OpenSSL for Android ${{ matrix.android_abi }}
+      - name: Configure OpenSSL for Android armeabi-v7a
         run: |
           mkdir -p ${{ env.OUTPUT_DIR }}
           export ANDROID_NDK_ROOT=$ANDROID_NDK_LATEST_HOME
           export PATH=$ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/linux-x86_64/bin:$PATH
-          
-          if [ "${{ matrix.arch }}" = "arm" ]; then
-            OPTS="${{ env.COMMON_OPTS }} no-asm"
-          else
-            OPTS="${{ env.COMMON_OPTS }}"
-          fi
-          
-          ./Configure ${{ matrix.openssl_target }} $OPTS -O2 -DNDEBUG \
+          ./Configure android-arm ${{ env.COMMON_OPTS }} no-asm -O2 -DNDEBUG \
             -Wl,--pack-dyn-relocs=android+relr,--use-android-relr-tags,--gc-sections \
             --prefix=${{ env.OUTPUT_DIR }} \
-            --openssldir=${{ env.OUTPUT_DIR }} \
-            --api=1.1.0
+            --openssldir=${{ env.OUTPUT_DIR }}
       
       - name: Build OpenSSL
         run: |
           export ANDROID_NDK_ROOT=$ANDROID_NDK_LATEST_HOME
           export PATH=$ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/linux-x86_64/bin:$PATH
-          export SCCACHE_C_CUSTOM_CACHE_BUSTER=${{ env.OPENSSL_BRANCH }}-${{ matrix.android_abi }}
-          export SCCACHE_RECACHE="true"
+          export SCCACHE_C_CUSTOM_CACHE_BUSTER=${{ env.OPENSSL_MASTER }}-armeabi-v7a
           make -j$(nproc) CC="sccache clang" CXX="sccache clang"
           make install
           
@@ -199,6 +227,7 @@ jobs:
         run: |
           TEMP_DIR=${{ env.PACKAGE_DIR }}
           mkdir -p $TEMP_DIR/lib
+          export ANDROID_NDK_ROOT=$ANDROID_NDK_LATEST_HOME
           export ANDROID_NDK_BIN=$ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/linux-x86_64/bin
           LIBSSL=$(find ${{ env.OUTPUT_DIR }} -name "libssl*.so" -type f)
           LIBCRYPTO=$(find ${{ env.OUTPUT_DIR }} -name "libcrypto*.so" -type f)
@@ -215,50 +244,128 @@ jobs:
           cp $LIBSSL $TEMP_DIR/lib/libssl.so
           cp $LIBCRYPTO $TEMP_DIR/lib/libcrypto.so
           mkdir -p $TEMP_DIR/include
-          cp -r include/* $TEMP_DIR/include/
+          cp -r ${{ env.OUTPUT_DIR }}/include/* $TEMP_DIR/include/
           
       - name: Package artifacts
-        run: 7z a "${{ env.OPENSSL_MASTER }}-${{ matrix.android_abi }}.zip" ${{ env.PACKAGE_DIR }}/*
+        run: 7z a "${{ env.OPENSSL_MASTER }}-armeabi-v7a.zip" ${{ env.PACKAGE_DIR }}/*
 
       - name: Upload build artifact
         uses: actions/upload-artifact@v6
         with:
-          name: ${{ env.OPENSSL_MASTER }}-${{ matrix.android_abi }}
-          path: ${{ env.OPENSSL_MASTER }}-${{ matrix.android_abi }}.zip
+          name: ${{ env.OPENSSL_MASTER }}-armeabi-v7a
+          path: ${{ env.OPENSSL_MASTER }}-armeabi-v7a.zip
+          retention-days: 5
+
+  build-openssl-android-arm64-master:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Run sccache-cache
+        uses: mozilla-actions/sccache-action@v0.0.9
+        
+      - name: Set up JDK
+        uses: actions/setup-java@v5
+        with:
+          distribution: 'temurin'
+          java-version: ${{ env.JAVA_VERSION }}
+          check-latest: true
+
+      - name: Checkout repository
+        uses: actions/checkout@v6
+        with:
+          repository: openssl/openssl
+          ref: master
+          fetch-depth: 0
+      
+      - name: Set up environment variables
+        run: |
+          echo "OUTPUT_DIR=$(pwd)/output/arm64-v8a" >> $GITHUB_ENV
+          echo "PACKAGE_DIR=$(pwd)/build" >> $GITHUB_ENV
+
+      - name: Configure OpenSSL for Android arm64-v8a
+        run: |
+          mkdir -p ${{ env.OUTPUT_DIR }}
+          export ANDROID_NDK_ROOT=$ANDROID_NDK_LATEST_HOME
+          export PATH=$ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/linux-x86_64/bin:$PATH
+          ./Configure android-arm64 ${{ env.COMMON_OPTS }} -O2 -DNDEBUG \
+            -Wl,--pack-dyn-relocs=android+relr,--use-android-relr-tags,--gc-sections \
+            --prefix=${{ env.OUTPUT_DIR }} \
+            --openssldir=${{ env.OUTPUT_DIR }}
+      
+      - name: Build OpenSSL
+        run: |
+          export ANDROID_NDK_ROOT=$ANDROID_NDK_LATEST_HOME
+          export PATH=$ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/linux-x86_64/bin:$PATH
+          export SCCACHE_C_CUSTOM_CACHE_BUSTER=${{ env.OPENSSL_MASTER }}-arm64-v8a
+          make -j$(nproc) CC="sccache clang" CXX="sccache clang"
+          make install
+          
+      - name: Strip .so files
+        run: |
+          TEMP_DIR=${{ env.PACKAGE_DIR }}
+          mkdir -p $TEMP_DIR/lib
+          export ANDROID_NDK_ROOT=$ANDROID_NDK_LATEST_HOME
+          export ANDROID_NDK_BIN=$ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/linux-x86_64/bin
+          LIBSSL=$(find ${{ env.OUTPUT_DIR }} -name "libssl*.so" -type f)
+          LIBCRYPTO=$(find ${{ env.OUTPUT_DIR }} -name "libcrypto*.so" -type f)
+          LIBSSLA=$(find ${{ env.OUTPUT_DIR }} -name "libssl*.a" -type f)
+          LIBCRYPTOA=$(find ${{ env.OUTPUT_DIR }} -name "libcrypto*.a" -type f)
+          $ANDROID_NDK_BIN/llvm-strip --strip-all $LIBSSL
+          $ANDROID_NDK_BIN/llvm-strip --strip-all $LIBCRYPTO
+          $ANDROID_NDK_BIN/llvm-strip --strip-all $LIBSSLA
+          $ANDROID_NDK_BIN/llvm-strip --strip-all $LIBCRYPTOA
+          cp $LIBSSL $TEMP_DIR/lib/libssl_3.so
+          cp $LIBCRYPTO $TEMP_DIR/lib/libcrypto_3.so
+          cp $LIBSSLA $TEMP_DIR/lib/libssl.a
+          cp $LIBCRYPTOA $TEMP_DIR/lib/libcrypto.a
+          cp $LIBSSL $TEMP_DIR/lib/libssl.so
+          cp $LIBCRYPTO $TEMP_DIR/lib/libcrypto.so
+          mkdir -p $TEMP_DIR/include
+          cp -r ${{ env.OUTPUT_DIR }}/include/* $TEMP_DIR/include/
+          
+      - name: Package artifacts
+        run: 7z a "${{ env.OPENSSL_MASTER }}-arm64-v8a.zip" ${{ env.PACKAGE_DIR }}/*
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v6
+        with:
+          name: ${{ env.OPENSSL_MASTER }}-arm64-v8a
+          path: ${{ env.OPENSSL_MASTER }}-arm64-v8a.zip
           retention-days: 5
 
   release:
-      needs: [build-openssl-android-branch, build-openssl-android-master]
-      runs-on: ubuntu-latest
-      if: ${{ !cancelled() && needs.build-openssl-android-branch.result == 'success'}}
-      steps:
-        - name: Download all artifacts
-          uses: actions/download-artifact@v7
-          with:
-            path: openssl-builds
-          
-        - name: Publish Daily Snapshot Release
-          uses: softprops/action-gh-release@v2
-          with:
-            tag_name: ${{ github.run_id }}
-            name: "OpenSSL for Android - Daily Build"            
-            fail_on_unmatched_files: false
-            body: |
-              Automated daily build of OpenSSL ${{ env.OPENSSL_BRANCH }} for Android
-  
-              This build includes binaries for Android (armeabi-v7a, arm64-v8a)
-              
-              **Note:** This snapshot may be overwritten by newer daily builds.
-            files: |
-              openssl-builds/${{ env.OPENSSL_BRANCH }}-armeabi-v7a/*.zip
-              openssl-builds/${{ env.OPENSSL_BRANCH }}-arm64-v8a/*.zip
-              openssl-builds/${{ env.OPENSSL_MASTER }}-armeabi-v7a/*.zip
-              openssl-builds/${{ env.OPENSSL_MASTER }}-arm64-v8a/*.zip
+    needs: [build-openssl-android-arm-branch, build-openssl-android-arm64-branch, build-openssl-android-arm-master, build-openssl-android-arm64-master]
+    runs-on: ubuntu-latest
+    if: ${{ !cancelled() && (needs.build-openssl-android-arm-branch.result == 'success' || needs.build-openssl-android-arm64-branch.result == 'success')}}
+    
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v7
+        with:
+          path: openssl-builds
+        
+      - name: Publish Daily Snapshot Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.run_id }}
+          name: "OpenSSL for Android - Daily Build"            
+          fail_on_unmatched_files: false
+          body: |
+            Automated daily build of OpenSSL ${{ env.OPENSSL_BRANCH }} for Android
+
+            This build includes binaries for Android (armeabi-v7a, arm64-v8a)
             
-        - name: Cleanup repository
-          uses: dev-drprasad/delete-older-releases@v0.3.4
-          with:
-            keep_latest: 3
-            delete_tags: true
-          env:
-            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+            **Note:** This snapshot may be overwritten by newer daily builds.
+          files: |
+            openssl-builds/${{ env.OPENSSL_BRANCH }}-armeabi-v7a/*.zip
+            openssl-builds/${{ env.OPENSSL_BRANCH }}-arm64-v8a/*.zip
+            openssl-builds/${{ env.OPENSSL_MASTER }}-armeabi-v7a/*.zip
+            openssl-builds/${{ env.OPENSSL_MASTER }}-arm64-v8a/*.zip
+          
+      - name: Cleanup repository
+        uses: dev-drprasad/delete-older-releases@v0.3.4
+        with:
+          keep_latest: 3
+          delete_tags: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
