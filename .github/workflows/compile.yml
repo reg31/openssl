@@ -73,8 +73,6 @@ jobs:
       - name: Configure OpenSSL for Android ${{ matrix.android_abi }}
         run: |
           mkdir -p ${{ env.OUTPUT_DIR }}
-          export CC="sccache clang" 
-          export CXX="sccache clang"
           export ANDROID_NDK_ROOT=$ANDROID_NDK_LATEST_HOME
           export PATH=$ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/linux-x86_64/bin:$PATH
           
@@ -94,7 +92,7 @@ jobs:
         run: |
           export ANDROID_NDK_ROOT=$ANDROID_NDK_LATEST_HOME
           export PATH=$ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/linux-x86_64/bin:$PATH 
-          make -j$(nproc)
+          make -j$(nproc) CC="sccache clang" CXX="sccache clang"
           make install
           
       - name: Strip .so files
@@ -171,8 +169,6 @@ jobs:
       - name: Configure OpenSSL for Android ${{ matrix.android_abi }}
         run: |
           mkdir -p ${{ env.OUTPUT_DIR }}
-          export CC="sccache clang" 
-          export CXX="sccache clang"
           export ANDROID_NDK_ROOT=$ANDROID_NDK_LATEST_HOME
           export PATH=$ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/linux-x86_64/bin:$PATH
           
@@ -192,7 +188,7 @@ jobs:
         run: |
           export ANDROID_NDK_ROOT=$ANDROID_NDK_LATEST_HOME
           export PATH=$ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/linux-x86_64/bin:$PATH 
-          make -j$(nproc)
+          make -j$(nproc) CC="sccache clang" CXX="sccache clang"
           make install
           
       - name: Strip .so files
