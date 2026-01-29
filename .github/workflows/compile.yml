@@ -92,7 +92,7 @@ jobs:
         run: |
           export ANDROID_NDK_ROOT=$ANDROID_NDK_LATEST_HOME
           export PATH=$ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/linux-x86_64/bin:$PATH 
-          make -j$(nproc) CC="sccache clang"
+          make -j$(nproc) CC="sccache clang" CXX="sccache clang"
           make install
           
       - name: Strip .so files
@@ -188,7 +188,7 @@ jobs:
         run: |
           export ANDROID_NDK_ROOT=$ANDROID_NDK_LATEST_HOME
           export PATH=$ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/linux-x86_64/bin:$PATH 
-          make -j$(nproc) CC="sccache clang"
+          make -j$(nproc) CC="sccache clang" CXX="sccache clang"
           make install
           
       - name: Strip .so files
