@@ -1,6 +1,7 @@
 name: Build OpenSSL for Android
 env:
   JAVA_VERSION: 25
+  SCCACHE_GHA_ENABLED: "true"
   OPENSSL_BRANCH: 'openssl-3.6'
   OPENSSL_MASTER: 'openssl-4.0'
   COMMON_OPTS: no-acvp-tests no-afalgeng no-argon2 no-aria no-asan no-autoerrinit
@@ -45,7 +46,10 @@ jobs:
         build_type:
           - Release
     
-    steps:     
+    steps:
+      - name: Run sccache-cache
+        uses: mozilla-actions/sccache-action@v0.0.9
+        
       - name: Set up JDK
         uses: actions/setup-java@v5
         with:
@@ -68,6 +72,8 @@ jobs:
       - name: Configure OpenSSL for Android ${{ matrix.android_abi }}
         run: |
           mkdir -p ${{ env.OUTPUT_DIR }}
+          export CMAKE_C_COMPILER_LAUNCHER="sccache"
+          export CMAKE_CXX_COMPILER_LAUNCHER="sccache"
           export ANDROID_NDK_ROOT=$ANDROID_NDK_LATEST_HOME
           export PATH=$ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/linux-x86_64/bin:$PATH
           
@@ -137,7 +143,10 @@ jobs:
         build_type:
           - Release
     
-    steps:  
+    steps:
+      - name: Run sccache-cache
+        uses: mozilla-actions/sccache-action@v0.0.9
+        
       - name: Set up JDK
         uses: actions/setup-java@v5
         with:
@@ -160,6 +169,8 @@ jobs:
       - name: Configure OpenSSL for Android ${{ matrix.android_abi }}
         run: |
           mkdir -p ${{ env.OUTPUT_DIR }}
+          export CMAKE_C_COMPILER_LAUNCHER="sccache"
+          export CMAKE_CXX_COMPILER_LAUNCHER="sccache"          
           export ANDROID_NDK_ROOT=$ANDROID_NDK_LATEST_HOME
           export PATH=$ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/linux-x86_64/bin:$PATH
           
