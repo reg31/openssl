@@ -7,7 +7,7 @@ env:
   COMMON_OPTS: no-acvp-tests no-afalgeng no-argon2 no-aria no-asan no-autoerrinit
     no-bf no-brotli no-brotli-dynamic no-buildtest-c++ no-unstable-qlog no-egd no-err
     no-camellia no-capieng no-cast no-cmp no-cms no-comp no-crypto-mdebug no-ct no-demos
-    no-devcryptoeng no-docs no-dtls1 no-dtls1-method no-sslkeylog no-apps o-ec2m no-external-tests
+    no-devcryptoeng no-docs no-dtls1 no-dtls1-method no-sslkeylog no-apps no-ec2m no-external-tests
     no-filenames no-fips no-fips-securitychecks no-fuzz-afl no-fuzz-libfuzzer no-dynamic-engine
     no-gost no-h3demo no-idea no-jitter no-seed no-hqinterop no-tls-deprecated-ec
     no-legacy no-md2 no-md4 no-mdc2 no-msan no-deprecated no-ocb no-padlockeng
