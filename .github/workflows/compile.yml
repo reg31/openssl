@@ -92,6 +92,7 @@ jobs:
         run: |
           export ANDROID_NDK_ROOT=$ANDROID_NDK_LATEST_HOME
           export PATH=$ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/linux-x86_64/bin:$PATH 
+          export SCCACHE_C_CUSTOM_CACHE_BUSTER=${{ env.OPENSSL_BRANCH }}-${{ matrix.android_abi }}
           make -j$(nproc) CC="sccache clang" CXX="sccache clang"
           make install
           
@@ -187,7 +188,8 @@ jobs:
       - name: Build OpenSSL
         run: |
           export ANDROID_NDK_ROOT=$ANDROID_NDK_LATEST_HOME
-          export PATH=$ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/linux-x86_64/bin:$PATH 
+          export PATH=$ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/linux-x86_64/bin:$PATH
+          export  SCCACHE_C_CUSTOM_CACHE_BUSTER=${{ env.OPENSSL_BRANCH }}-${{ matrix.android_abi }}
           make -j$(nproc) CC="sccache clang" CXX="sccache clang"
           make install
           
