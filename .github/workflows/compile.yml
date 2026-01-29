@@ -82,7 +82,7 @@ jobs:
             OPTS="${{ env.COMMON_OPTS }}"
           fi
           
-          ./Configure ${{ matrix.openssl_target }} $OPTS -O2 -DNDEBUG "CC=sccache clang" "CXX=sccache clang" \
+          ./Configure ${{ matrix.openssl_target }} $OPTS CC="sccache clang" CXX="sccache clang" -O2 -DNDEBUG \
             -Wl,--pack-dyn-relocs=android+relr,--use-android-relr-tags,--gc-sections \
             --prefix=${{ env.OUTPUT_DIR }} \
             --openssldir=${{ env.OUTPUT_DIR }} \
@@ -178,7 +178,7 @@ jobs:
             OPTS="${{ env.COMMON_OPTS }}"
           fi
           
-          ./Configure ${{ matrix.openssl_target }} $OPTS -O2 -DNDEBUG "CC=sccache clang" "CXX=sccache clang" \
+          ./Configure ${{ matrix.openssl_target }} $OPTS CC="sccache clang" CXX="sccache clang" -O2 -DNDEBUG \
             -Wl,--pack-dyn-relocs=android+relr,--use-android-relr-tags,--gc-sections \
             --prefix=${{ env.OUTPUT_DIR }} \
             --openssldir=${{ env.OUTPUT_DIR }} \
