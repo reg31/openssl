@@ -73,8 +73,6 @@ jobs:
       - name: Configure OpenSSL for Android ${{ matrix.android_abi }}
         run: |
           mkdir -p ${{ env.OUTPUT_DIR }}
-          export CMAKE_C_COMPILER_LAUNCHER="ccache"
-          export CMAKE_CXX_COMPILER_LAUNCHER="ccache"
           export ANDROID_NDK_ROOT=$ANDROID_NDK_LATEST_HOME
           export PATH=$ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/linux-x86_64/bin:$PATH
           
@@ -84,7 +82,7 @@ jobs:
             OPTS="${{ env.COMMON_OPTS }}"
           fi
           
-          ./Configure ${{ matrix.openssl_target }} $OPTS -O2 -DNDEBUG \
+          ./Configure ${{ matrix.openssl_target }} CC="ccache clang" CXX="ccache clang" $OPTS -O2 -DNDEBUG \
             -Wl,--pack-dyn-relocs=android+relr,--use-android-relr-tags,--gc-sections \
             --prefix=${{ env.OUTPUT_DIR }} \
             --openssldir=${{ env.OUTPUT_DIR }} \
@@ -172,8 +170,6 @@ jobs:
       - name: Configure OpenSSL for Android ${{ matrix.android_abi }}
         run: |
           mkdir -p ${{ env.OUTPUT_DIR }}
-          export CMAKE_C_COMPILER_LAUNCHER="ccache"
-          export CMAKE_CXX_COMPILER_LAUNCHER="ccache"
           export ANDROID_NDK_ROOT=$ANDROID_NDK_LATEST_HOME
           export PATH=$ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/linux-x86_64/bin:$PATH
           
@@ -183,7 +179,7 @@ jobs:
             OPTS="${{ env.COMMON_OPTS }}"
           fi
           
-          ./Configure ${{ matrix.openssl_target }} $OPTS -O2 -DNDEBUG \
+          ./Configure ${{ matrix.openssl_target }} CC="ccache clang" CXX="ccache clang" $OPTS -O2 -DNDEBUG \
             -Wl,--pack-dyn-relocs=android+relr,--use-android-relr-tags,--gc-sections \
             --prefix=${{ env.OUTPUT_DIR }} \
             --openssldir=${{ env.OUTPUT_DIR }} \
