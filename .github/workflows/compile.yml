@@ -31,7 +31,7 @@ on:
     branches: [ main ]
 jobs:
   build-openssl-android-branch:
-    runs-on: ubuntu-slim
+    runs-on: ubuntu-latest
     strategy:
       matrix:
         arch: [arm, arm64]
@@ -130,7 +130,7 @@ jobs:
           retention-days: 5
 
   build-openssl-android-master:
-    runs-on: ubuntu-slim
+    runs-on: ubuntu-latest
     strategy:
       matrix:
         arch: [arm, arm64]
