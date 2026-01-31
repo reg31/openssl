@@ -59,11 +59,6 @@ jobs:
           repository: openssl/openssl
           ref: "${{ github.event.inputs.openssl_branch || env.OPENSSL_BRANCH }}"
           fetch-depth: 0
-
-      - name: Setup ccache
-        uses: hendrikmuhs/ccache-action@v1
-        with:
-          verbose: 1
       
       - name: Set up environment variables
         run: |
@@ -157,11 +152,6 @@ jobs:
           ref: master
           #ref: feature/engineremoval
           fetch-depth: 0
-
-      - name: Setup ccache
-        uses: hendrikmuhs/ccache-action@v1
-        with:
-          verbose: 1
       
       - name: Set up environment variables
         run: |
