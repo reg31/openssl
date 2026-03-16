@@ -149,7 +149,7 @@ jobs:
         uses: actions/checkout@v6
         with:
           repository: openssl/openssl
-          ref: master
+          ref: "${{ env.OPENSSL_MASTER }}"
           #ref: feature/engineremoval
           fetch-depth: 0
       
