@@ -225,7 +225,7 @@ jobs:
             path: openssl-builds
           
         - name: Publish Daily Snapshot Release
-          uses: softprops/action-gh-release@v2
+          uses: softprops/action-gh-release@v3
           with:
             tag_name: ${{ github.run_id }}
             name: "OpenSSL for Android - Daily Build"            
