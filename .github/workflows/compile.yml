@@ -46,7 +46,7 @@ jobs:
     
     steps:
       - name: Set up JDK
-        uses: actions/setup-java@v5
+        uses: actions/setup-java@v6
         with:
           distribution: 'temurin'
           java-version: latest
@@ -137,7 +137,7 @@ jobs:
     
     steps:
       - name: Set up JDK
-        uses: actions/setup-java@v5
+        uses: actions/setup-java@v6
         with:
           distribution: 'temurin'
           java-version: latest
