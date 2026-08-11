@@ -1,5 +1,6 @@
 name: Build OpenSSL for Android
 env:
+  JAVA_VERSION: 25
   OPENSSL_BRANCH: 'openssl-3.6'
   OPENSSL_MASTER: 'openssl-4.0'
   COMMON_OPTS: no-acvp-tests no-afalgeng no-argon2 no-aria no-asan no-autoerrinit
@@ -46,10 +47,11 @@ jobs:
     
     steps:
       - name: Set up JDK
-        uses: actions/setup-java@v6
+        uses: actions/setup-java@v5
         with:
           distribution: 'temurin'
-          java-version: latest
+          java-version: ${{ env.JAVA_VERSION }}
+          check-latest: true
 
       - name: Checkout repository
         uses: actions/checkout@v7
@@ -137,10 +139,11 @@ jobs:
     
     steps:
       - name: Set up JDK
-        uses: actions/setup-java@v6
+        uses: actions/setup-java@v5
         with:
           distribution: 'temurin'
-          java-version: latest
+          java-version: ${{ env.JAVA_VERSION }}
+          check-latest: true
 
       - name: Checkout repository
         uses: actions/checkout@v7
