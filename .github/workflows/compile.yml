@@ -1,7 +1,7 @@
 name: Build OpenSSL for Android
 env:
   OPENSSL_BRANCH: 'openssl-3.6'
-  OPENSSL_MASTER: 'openssl-4.0'
+  OPENSSL_MASTER: 'openssl-4.1'
   COMMON_OPTS: no-acvp-tests no-afalgeng no-argon2 no-aria no-asan no-autoerrinit
     no-bf no-brotli no-brotli-dynamic no-buildtest-c++ no-unstable-qlog no-egd no-err
     no-camellia no-capieng no-cast no-cmp no-cms no-comp no-crypto-mdebug no-ct no-demos
